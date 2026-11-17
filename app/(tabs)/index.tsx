@@ -1,549 +1,383 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import {
-  View, Text, StyleSheet, Dimensions, Image, TouchableOpacity,
-  Animated, Modal, ScrollView, TextInput, KeyboardAvoidingView, Platform,
+  View,
+  Text,
+  ScrollView,
+  StyleSheet,
+  Dimensions,
+  Pressable,
+  Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { SparkColors, SparkFonts, SparkTypography } from '@/constants/Spark';
+import { useRouter } from 'expo-router';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
+  withDelay,
+  interpolate,
+  Extrapolation,
+  runOnJS,
+} from 'react-native-reanimated';
+import { SparkColors, SparkFonts } from '@/constants/Spark';
+import { useStore } from '@/store/useStore';
+import { MOCK_TAKES } from '@/data/mockData';
 
 const { width: SW, height: SH } = Dimensions.get('window');
 const S = SW / 390;
 
-/* ───── background pattern data ───── */
-type Shape = { type: 'square' | 'circle'; x: number; y: number };
-const PATTERN_SHAPES: Shape[] = [
-  { type: 'square', x: -3, y: 0 }, { type: 'circle', x: 61, y: 0 },
-  { type: 'square', x: 125, y: 0 }, { type: 'square', x: 253, y: 0 },
-  { type: 'square', x: 317, y: 0 }, { type: 'circle', x: 381, y: 0 },
-  { type: 'circle', x: -3, y: 64 }, { type: 'square', x: 61, y: 64 },
-  { type: 'square', x: 189, y: 64 }, { type: 'circle', x: 253, y: 64 },
-  { type: 'circle', x: 317, y: 64 }, { type: 'square', x: 381, y: 64 },
-  { type: 'square', x: -3, y: 128 }, { type: 'square', x: 125, y: 128 },
-  { type: 'circle', x: 189, y: 128 }, { type: 'square', x: 253, y: 128 },
-  { type: 'square', x: 317, y: 128 },
-  { type: 'square', x: 61, y: 192 }, { type: 'circle', x: 125, y: 192 },
-  { type: 'square', x: 189, y: 192 }, { type: 'square', x: 381, y: 192 },
-  { type: 'square', x: -3, y: 256 }, { type: 'circle', x: 61, y: 256 },
-  { type: 'square', x: 125, y: 256 }, { type: 'square', x: 253, y: 256 },
-  { type: 'square', x: 317, y: 256 }, { type: 'circle', x: 381, y: 256 },
-  { type: 'square', x: -3, y: 320 }, { type: 'circle', x: 61, y: 320 },
-  { type: 'square', x: 125, y: 320 }, { type: 'square', x: 253, y: 320 },
-  { type: 'square', x: 317, y: 320 }, { type: 'circle', x: 381, y: 320 },
-];
-const SHAPE_SIZE = 56;
-const PATTERN_H = 384;
-const YELLOW_SQ = '#FDE068';
-const CORAL_CIR = '#F0A090';
+const SPRING = { damping: 14, stiffness: 120, mass: 0.8 };
 
-function BackgroundPattern() {
-  return (
-    <View style={patStyles.wrap} pointerEvents="none">
-      {PATTERN_SHAPES.map((s, i) => {
-        const rowOpacity = Math.max(0.03, 0.14 - (s.y / PATTERN_H) * 0.14);
-        const size = SHAPE_SIZE * S;
-        return (
-          <View
-            key={i}
-            style={{
-              position: 'absolute',
-              left: s.x * S,
-              top: s.y * S,
-              width: size,
-              height: size,
-              borderRadius: s.type === 'circle' ? size / 2 : 12 * S,
-              backgroundColor: s.type === 'square' ? YELLOW_SQ : CORAL_CIR,
-              opacity: rowOpacity,
-            }}
-          />
-        );
-      })}
-    </View>
-  );
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+
+/* ---------- FadeInView wrapper ---------- */
+function FadeInView({
+  children,
+  delay = 0,
+  style,
+}: {
+  children: React.ReactNode;
+  delay?: number;
+  style?: any;
+}) {
+  const progress = useSharedValue(0);
+  useEffect(() => {
+    progress.value = withDelay(delay, withSpring(1, SPRING));
+  }, []);
+  const anim = useAnimatedStyle(() => ({
+    opacity: progress.value,
+    transform: [
+      { translateY: interpolate(progress.value, [0, 1], [18, 0], Extrapolation.CLAMP) },
+    ],
+  }));
+  return <Animated.View style={[anim, style]}>{children}</Animated.View>;
 }
-const patStyles = StyleSheet.create({
-  wrap: { position: 'absolute', top: 0, left: 0, width: SW, height: PATTERN_H * S, overflow: 'hidden' },
-});
 
-/* ───── occasion choices ───── */
-const OCCASIONS = [
-  { id: 'interview', label: 'A job interview', icon: 'briefcase-outline' as const },
-  { id: 'pitch', label: 'A pitch', icon: 'chatbubble-outline' as const },
-  { id: 'keynote', label: 'A keynote', icon: 'mic-outline' as const },
-  { id: 'lecture', label: 'A class or lecture', icon: 'school-outline' as const },
-  { id: 'toast', label: 'A toast', icon: 'wine-outline' as const },
-  { id: 'other', label: 'Other', icon: 'happy-outline' as const },
-];
-
-/* ───── material choices ───── */
-const MATERIALS = [
-  { id: 'script', title: 'Paste script', desc: 'Type or paste your speech text', icon: 'document-text-outline' as const },
-  { id: 'upload', title: 'Upload audio or video', desc: 'Choose an audio or video file', icon: 'cloud-upload-outline' as const },
-];
-
-/* ───── time choices ───── */
-const TIMES = [
-  { id: '1', label: '1 minute', icon: 'time-outline' as const },
-  { id: '3', label: '3 minutes', icon: 'time-outline' as const },
-  { id: '5', label: '5 minutes', icon: 'time-outline' as const },
-  { id: '15', label: '15 minutes', icon: 'time-outline' as const },
-  { id: 'custom', label: 'Customize...', icon: 'time-outline' as const },
-];
-
-/* ───── Figma-exact colors ───── */
-const CHOICE_DEFAULT_BG = '#FFE9BB';
-const CHOICE_DEFAULT_BORDER = '#E7DED2';
-const CHOICE_SELECTED_BG = '#FFF1C1';
-const CHOICE_SELECTED_BORDER = '#FF9900';
-
-/* ───── bottom sheet constants ───── */
-const SHEET_TOP = SH * 0.166; // Figma: y=140/844
-const SHEET_RADIUS = 32 * S;
-
-/* ═══════════════════════════════════════════ */
 export default function HomeScreen() {
-  const [showSheet, setShowSheet] = useState(false);
-  const [step, setStep] = useState(1);
-  const [sessionName, setSessionName] = useState('');
-  const [occasion, setOccasion] = useState('');
-  const [material, setMaterial] = useState('');
-  const [timeChoice, setTimeChoice] = useState('');
+  const router = useRouter();
+  const { user } = useStore();
+  const hasRecordings = MOCK_TAKES.length > 0;
+  const latestTake = MOCK_TAKES[0];
 
-  const slideAnim = useRef(new Animated.Value(SH)).current;
+  /* bottom sheet for new recording */
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const sheetY = useSharedValue(SH);
 
-  const openSheet = () => {
-    setStep(1);
-    setShowSheet(true);
-    Animated.spring(slideAnim, { toValue: 0, useNativeDriver: true, tension: 65, friction: 11 }).start();
-  };
-  const closeSheet = () => {
-    Animated.timing(slideAnim, { toValue: SH, duration: 250, useNativeDriver: true }).start(() => {
-      setShowSheet(false);
-      setStep(1);
-      setSessionName('');
-      setOccasion('');
-      setMaterial('');
-      setTimeChoice('');
-    });
-  };
-  const next = () => { if (step < 3) setStep(step + 1); };
-  const back = () => { if (step > 1) setStep(step - 1); else closeSheet(); };
+  const openSheet = useCallback(() => {
+    setSheetOpen(true);
+    sheetY.value = withSpring(0, { damping: 20, stiffness: 140 });
+  }, []);
+
+  const closeSheet = useCallback(() => {
+    sheetY.value = withSpring(SH, { damping: 20, stiffness: 140 });
+    setTimeout(() => setSheetOpen(false), 400);
+  }, []);
+
+  const sheetStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: sheetY.value }],
+  }));
+
+  const dur = latestTake
+    ? `${Math.floor(latestTake.durationSec / 60)}:${String(latestTake.durationSec % 60).padStart(2, '0')}`
+    : '';
 
   return (
-    <View style={styles.root}>
-      <BackgroundPattern />
-
-      <SafeAreaView style={styles.safe} edges={['top']}>
-        <View style={styles.homeContent}>
-          {/* ─── Logo row: icon + "Orate" ─── */}
-          <View style={styles.logoRow}>
-            <Image source={require('@/assets/images/orate-logo.png')} style={styles.logoIcon} resizeMode="contain" />
-            <Text style={styles.logoText}>Orate</Text>
+    <SafeAreaView style={s.container} edges={['top']}>
+      {/* Header */}
+      <FadeInView delay={0}>
+        <View style={s.header}>
+          <View>
+            <Text style={s.greeting}>Good morning,</Text>
+            <Text style={s.name}>{user.name}</Text>
           </View>
-
-          {/* ─── Character + text + CTA block (centered) ─── */}
-          <View style={styles.hero}>
-            <Image source={require('@/assets/images/orate-character.png')} style={styles.character} resizeMode="contain" />
-            <View style={styles.titleBlock}>
-              <Text style={styles.heroTitle}>Let's record your{'\n'}first section</Text>
-              <Text style={styles.heroSub}>Set up a session, then press record.</Text>
-            </View>
+          <View style={s.avatarCircle}>
+            <Ionicons name="person" size={20 * S} color={SparkColors.warmGray} />
           </View>
-
-          {/* CTA — in flow, 45px below title block */}
-          <TouchableOpacity style={styles.ctaBtn} activeOpacity={0.85} onPress={openSheet}>
-            <Text style={styles.ctaText}>Start my first recording</Text>
-          </TouchableOpacity>
         </View>
-      </SafeAreaView>
+      </FadeInView>
 
-      {/* ═══ Bottom Sheet ═══ */}
-      <Modal visible={showSheet} transparent animationType="none" statusBarTranslucent>
-        <View style={styles.overlay}>
-          <Animated.View style={[styles.sheet, { transform: [{ translateY: slideAnim }] }]}>
-            <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }}>
-              {/* sheet header */}
-              <View style={styles.sheetHeader}>
-                {step > 1 ? (
-                  <TouchableOpacity onPress={back} hitSlop={12} style={styles.headerBtn}>
-                    <Ionicons name="arrow-back" size={24 * S} color={SparkColors.cocoaText} />
-                  </TouchableOpacity>
-                ) : (
-                  <View style={styles.headerBtn} />
-                )}
-                <View style={{ flex: 1 }} />
-                <TouchableOpacity onPress={closeSheet} hitSlop={12} style={styles.headerBtn}>
-                  <Ionicons name="close" size={24 * S} color={SparkColors.cocoaText} />
-                </TouchableOpacity>
-              </View>
-
-              <ScrollView
-                style={styles.sheetScroll}
-                contentContainerStyle={styles.sheetScrollContent}
-                showsVerticalScrollIndicator={false}
-                keyboardShouldPersistTaps="handled"
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={s.scroll}
+      >
+        {hasRecordings ? (
+          <>
+            {/* Hero card — latest session */}
+            <FadeInView delay={80}>
+              <AnimatedPressable
+                style={s.heroCard}
+                onPress={() =>
+                  router.push({
+                    pathname: '/feedback/overview',
+                    params: { takeId: latestTake.id },
+                  })
+                }
               >
-                {/* step indicator */}
-                <Text style={styles.stepLabel}>{step} of 3</Text>
+                <Text style={s.heroLabel}>Latest session</Text>
+                <Text style={s.heroTitle}>{latestTake.label}</Text>
+                <View style={s.heroMeta}>
+                  <Text style={s.heroScore}>{latestTake.score}</Text>
+                  <Text style={s.heroScoreMax}>/100</Text>
+                  <View style={s.heroDot} />
+                  <Text style={s.heroDur}>{dur}</Text>
+                </View>
+                <Text style={s.heroDate}>{latestTake.date}</Text>
+              </AnimatedPressable>
+            </FadeInView>
 
-                {/* ═══ STEP 1 ═══ */}
-                {step === 1 && (
-                  <>
-                    <Text style={styles.sheetTitle}>Set up your recording</Text>
-
-                    <Text style={styles.fieldLabel}>Session name · optional</Text>
-                    <TextInput
-                      style={styles.input}
-                      placeholder="Series B pitch"
-                      placeholderTextColor={SparkColors.paleGray}
-                      value={sessionName}
-                      onChangeText={setSessionName}
-                    />
-
-                    <Text style={styles.fieldLabel}>What are you preparing for?</Text>
-                    {OCCASIONS.map((o) => (
-                      <TouchableOpacity
-                        key={o.id}
-                        style={[styles.optionRow, occasion === o.id && styles.optionRowActive]}
-                        activeOpacity={0.7}
-                        onPress={() => setOccasion(o.id)}
-                      >
-                        <Ionicons name={o.icon} size={20 * S} color={SparkColors.brandOrange} style={styles.optionIcon} />
-                        <Text style={styles.optionText}>{o.label}</Text>
-                        <View style={[styles.radioOuter, occasion === o.id && styles.radioOuterActive]}>
-                          {occasion === o.id && <View style={styles.radioInner} />}
-                        </View>
-                      </TouchableOpacity>
-                    ))}
-                  </>
-                )}
-
-                {/* ═══ STEP 2 ═══ */}
-                {step === 2 && (
-                  <>
-                    <Text style={styles.sheetTitle}>Add your material</Text>
-                    <Text style={styles.sheetSub}>Optionally add a script or recording to compare against.</Text>
-
-                    {MATERIALS.map((m) => (
-                      <TouchableOpacity
-                        key={m.id}
-                        style={[styles.materialCard, material === m.id && styles.materialCardActive]}
-                        activeOpacity={0.7}
-                        onPress={() => setMaterial(m.id)}
-                      >
-                        <Ionicons name={m.icon} size={20 * S} color={SparkColors.brandOrange} style={{ marginTop: 2 * S }} />
-                        <View style={styles.materialTextWrap}>
-                          <Text style={styles.materialTitle}>{m.title}</Text>
-                          <Text style={styles.materialDesc}>{m.desc}</Text>
-                        </View>
-                      </TouchableOpacity>
-                    ))}
-
-                    <Text style={styles.helperText}>You can always add or change this later.</Text>
-                  </>
-                )}
-
-                {/* ═══ STEP 3 ═══ */}
-                {step === 3 && (
-                  <>
-                    <Text style={styles.sheetTitle}>Time</Text>
-                    <Text style={styles.sheetSub}>Set a target duration for your session.</Text>
-
-                    {TIMES.map((t) => (
-                      <TouchableOpacity
-                        key={t.id}
-                        style={[styles.optionRow, timeChoice === t.id && styles.optionRowActive]}
-                        activeOpacity={0.7}
-                        onPress={() => setTimeChoice(t.id)}
-                      >
-                        <Ionicons name={t.icon} size={20 * S} color={SparkColors.brandOrange} style={styles.optionIcon} />
-                        <Text style={styles.optionText}>{t.label}</Text>
-                        <View style={[styles.radioOuter, timeChoice === t.id && styles.radioOuterActive]}>
-                          {timeChoice === t.id && <View style={styles.radioInner} />}
-                        </View>
-                      </TouchableOpacity>
-                    ))}
-                  </>
-                )}
-              </ScrollView>
-
-              {/* bottom button */}
-              <View style={styles.sheetFooter}>
-                <TouchableOpacity
-                  style={styles.darkBtn}
-                  activeOpacity={0.85}
-                  onPress={step < 3 ? next : closeSheet}
+            {/* Previous sessions */}
+            <FadeInView delay={160}>
+              <Text style={s.sectionLabel}>Previous sessions</Text>
+              {MOCK_TAKES.slice(1, 4).map((take) => (
+                <AnimatedPressable
+                  key={take.id}
+                  style={s.sessionRow}
+                  onPress={() =>
+                    router.push({
+                      pathname: '/feedback/overview',
+                      params: { takeId: take.id },
+                    })
+                  }
                 >
-                  <Text style={styles.darkBtnText}>
-                    {step === 1 ? 'Next' : step === 2 ? 'Continue without material' : 'Skip for now'}
-                  </Text>
-                </TouchableOpacity>
+                  <View style={s.sessionLeft}>
+                    <Text style={s.sessionTitle}>{take.label}</Text>
+                    <Text style={s.sessionDate}>{take.date}</Text>
+                  </View>
+                  <View style={s.sessionRight}>
+                    <Text style={s.sessionScore}>{take.score}</Text>
+                    <Ionicons name="chevron-forward" size={16 * S} color={SparkColors.chevron} />
+                  </View>
+                </AnimatedPressable>
+              ))}
+            </FadeInView>
+          </>
+        ) : (
+          /* First-use hero */
+          <FadeInView delay={80}>
+            <View style={s.firstUseCard}>
+              <View style={s.firstUseIllustration}>
+                <Ionicons name="mic-outline" size={48 * S} color={SparkColors.brandOrange} />
               </View>
-            </KeyboardAvoidingView>
-          </Animated.View>
-        </View>
-      </Modal>
-    </View>
+              <Text style={s.firstUseTitle}>Ready to practice?</Text>
+              <Text style={s.firstUseSub}>
+                Record your first speech and get instant AI feedback on pacing, filler words, and
+                delivery.
+              </Text>
+            </View>
+          </FadeInView>
+        )}
+
+        {/* Quick actions */}
+        <FadeInView delay={240}>
+          <Text style={s.sectionLabel}>Quick start</Text>
+          <View style={s.quickRow}>
+            <AnimatedPressable
+              style={s.quickCard}
+              onPress={() => router.push('/lessons/practice')}
+            >
+              <Ionicons name="mic-outline" size={24 * S} color={SparkColors.brandOrange} />
+              <Text style={s.quickTitle}>Free practice</Text>
+              <Text style={s.quickSub}>Record & get feedback</Text>
+            </AnimatedPressable>
+            <AnimatedPressable
+              style={s.quickCard}
+              onPress={() => router.push('/lessons/detail?lessonId=pause')}
+            >
+              <Ionicons name="book-outline" size={24 * S} color={SparkColors.brandOrange} />
+              <Text style={s.quickTitle}>Browse lessons</Text>
+              <Text style={s.quickSub}>Guided skill building</Text>
+            </AnimatedPressable>
+          </View>
+        </FadeInView>
+
+        {/* Spacer for tab bar */}
+        <View style={{ height: 100 * S }} />
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
-/* ═══════════ styles ═══════════ */
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: SparkColors.cream },
-  safe: { flex: 1 },
-
-  /* ── home ── */
-  homeContent: {
-    flex: 1,
-    paddingHorizontal: 24 * S,
-  },
-
-  /* logo */
-  logoRow: {
+const s = StyleSheet.create({
+  container: { flex: 1, backgroundColor: SparkColors.cream },
+  header: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: 9 * S,
+    paddingHorizontal: 24 * S,
+    paddingTop: 8 * S,
+    paddingBottom: 16 * S,
   },
-  logoIcon: {
-    width: 38 * S,
-    height: 38 * S,
+  greeting: {
+    fontFamily: SparkFonts.robotoRegular,
+    fontSize: 15 * S,
+    color: SparkColors.warmGray,
   },
-  logoText: {
+  name: {
     fontFamily: SparkFonts.outfitBold,
     fontSize: 24 * S,
-    color: SparkColors.brandOrange,
-    marginLeft: 6 * S,
+    color: SparkColors.cocoaText,
+    marginTop: 2 * S,
   },
+  avatarCircle: {
+    width: 40 * S,
+    height: 40 * S,
+    borderRadius: 20 * S,
+    backgroundColor: SparkColors.warmCanvas,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: SparkColors.warmBorder,
+  },
+  scroll: { paddingHorizontal: 24 * S },
 
-  /* hero block */
-  hero: {
-    alignItems: 'center',
-    marginTop: 150 * S,
+  /* Hero card */
+  heroCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20 * S,
+    borderWidth: 1,
+    borderColor: SparkColors.warmBorder,
+    padding: 20 * S,
+    marginBottom: 20 * S,
   },
-  character: {
-    width: 77 * S,
-    height: 73 * S,
-    marginBottom: 15 * S,
-  },
-  titleBlock: {
-    width: 294 * S,
-    alignItems: 'center',
+  heroLabel: {
+    fontFamily: SparkFonts.robotoMedium,
+    fontSize: 11 * S,
+    letterSpacing: 1.2,
+    color: SparkColors.textLabel,
+    marginBottom: 8 * S,
   },
   heroTitle: {
     fontFamily: SparkFonts.outfitBold,
-    fontSize: 28 * S,
-    lineHeight: 34 * S,
-    color: SparkColors.cocoaCta,
-    textAlign: 'center',
-    marginBottom: 14 * S,
+    fontSize: 20 * S,
+    color: SparkColors.cocoaText,
+    marginBottom: 10 * S,
   },
-  heroSub: {
+  heroMeta: { flexDirection: 'row', alignItems: 'baseline', marginBottom: 6 * S },
+  heroScore: {
+    fontFamily: SparkFonts.outfitBold,
+    fontSize: 36 * S,
+    color: SparkColors.coral || SparkColors.orangeScore,
+  },
+  heroScoreMax: {
+    fontFamily: SparkFonts.robotoRegular,
+    fontSize: 16 * S,
+    color: SparkColors.warmGray,
+    marginLeft: 2 * S,
+  },
+  heroDot: {
+    width: 4 * S,
+    height: 4 * S,
+    borderRadius: 2 * S,
+    backgroundColor: SparkColors.warmGray,
+    marginHorizontal: 10 * S,
+    marginBottom: 4 * S,
+  },
+  heroDur: {
     fontFamily: SparkFonts.robotoRegular,
     fontSize: 15 * S,
-    lineHeight: 21 * S,
-    color: SparkColors.cocoaCta,
-    textAlign: 'center',
+    color: SparkColors.warmGray,
+  },
+  heroDate: {
+    fontFamily: SparkFonts.robotoRegular,
+    fontSize: 13 * S,
+    color: SparkColors.warmGray,
   },
 
-  /* CTA */
-  ctaBtn: {
-    backgroundColor: SparkColors.cocoaCta,
-    borderRadius: 23 * S,
-    height: 52 * S,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 45 * S,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.17,
-    shadowRadius: 3.5,
-    elevation: 3,
-  },
-  ctaText: {
-    fontFamily: SparkFonts.robotoBold,
-    fontSize: 16 * S,
-    color: '#FFFCF5',
+  /* Section */
+  sectionLabel: {
+    fontFamily: SparkFonts.robotoMedium,
+    fontSize: 11 * S,
+    letterSpacing: 1.2,
+    color: SparkColors.textLabel,
+    marginBottom: 12 * S,
+    marginTop: 4 * S,
   },
 
-  /* ── sheet ── */
-  overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.25)' },
-  sheet: {
-    position: 'absolute',
-    top: SHEET_TOP,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: SparkColors.cream,
-    borderTopLeftRadius: SHEET_RADIUS,
-    borderTopRightRadius: SHEET_RADIUS,
-  },
-  sheetHeader: {
+  /* Session rows */
+  sessionRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 12 * S,
-    paddingTop: 12 * S,
-    paddingBottom: 0,
-  },
-  headerBtn: {
-    width: 44 * S,
-    height: 44 * S,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  sheetScroll: { flex: 1 },
-  sheetScrollContent: {
-    paddingHorizontal: 24 * S,
-    paddingBottom: 24 * S,
-  },
-
-  /* step indicator */
-  stepLabel: {
-    fontFamily: SparkFonts.robotoMedium,
-    fontSize: 13 * S,
-    color: SparkColors.warmGray,
-    marginBottom: 7 * S,
-  },
-  sheetTitle: {
-    fontFamily: SparkFonts.outfitBold,
-    fontSize: 28 * S,
-    lineHeight: 36 * S,
-    color: SparkColors.cocoaText,
-    marginBottom: 20 * S,
-  },
-  sheetSub: {
-    fontFamily: SparkFonts.robotoRegular,
-    fontSize: 14 * S,
-    lineHeight: 20 * S,
-    color: SparkColors.warmGray,
-    marginTop: -12 * S,
-    marginBottom: 20 * S,
-  },
-
-  /* text input */
-  fieldLabel: {
-    fontFamily: SparkFonts.robotoMedium,
-    fontSize: 14 * S,
-    color: SparkColors.cocoaText,
-    marginBottom: 6 * S,
-  },
-  input: {
     backgroundColor: '#FFFFFF',
     borderRadius: 16 * S,
     borderWidth: 1,
     borderColor: SparkColors.warmBorder,
-    height: 48 * S,
-    paddingHorizontal: 16 * S,
-    fontFamily: SparkFonts.robotoRegular,
-    fontSize: 15 * S,
-    color: SparkColors.cocoaText,
-    marginBottom: 20 * S,
+    padding: 16 * S,
+    marginBottom: 10 * S,
   },
-
-  /* option rows */
-  optionRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    height: 49 * S,
-    borderRadius: 23 * S,
-    borderWidth: 1,
-    borderColor: CHOICE_DEFAULT_BORDER,
-    backgroundColor: CHOICE_DEFAULT_BG,
-    paddingLeft: 17 * S,
-    paddingRight: 14 * S,
-    marginBottom: 8 * S,
-  },
-  optionRowActive: {
-    borderColor: CHOICE_SELECTED_BORDER,
-    borderWidth: 1.5,
-    backgroundColor: CHOICE_SELECTED_BG,
-  },
-  optionIcon: {
-    width: 20 * S,
-  },
-  optionText: {
-    flex: 1,
-    fontFamily: SparkFonts.robotoMedium,
-    fontSize: 16 * S,
-    color: SparkColors.cocoaText,
-    marginLeft: 15 * S,
-  },
-  radioOuter: {
-    width: 20 * S,
-    height: 20 * S,
-    borderRadius: 10 * S,
-    borderWidth: 1.5,
-    borderColor: CHOICE_DEFAULT_BORDER,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  radioOuterActive: {
-    borderColor: CHOICE_SELECTED_BORDER,
-  },
-  radioInner: {
-    width: 8 * S,
-    height: 8 * S,
-    borderRadius: 4 * S,
-    backgroundColor: '#FFFFFF',
-  },
-
-  /* material cards */
-  materialCard: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    height: 72 * S,
-    borderRadius: 20 * S,
-    borderWidth: 1,
-    borderColor: CHOICE_DEFAULT_BORDER,
-    backgroundColor: CHOICE_DEFAULT_BG,
-    paddingHorizontal: 18 * S,
-    paddingVertical: 14 * S,
-    marginBottom: 12 * S,
-  },
-  materialCardActive: {
-    borderColor: CHOICE_SELECTED_BORDER,
-    borderWidth: 1.5,
-    backgroundColor: CHOICE_SELECTED_BG,
-  },
-  materialTextWrap: {
-    flex: 1,
-    marginLeft: 14 * S,
-  },
-  materialTitle: {
+  sessionLeft: { flex: 1 },
+  sessionTitle: {
     fontFamily: SparkFonts.robotoMedium,
     fontSize: 15 * S,
     color: SparkColors.cocoaText,
     marginBottom: 2 * S,
   },
-  materialDesc: {
+  sessionDate: {
     fontFamily: SparkFonts.robotoRegular,
     fontSize: 13 * S,
     color: SparkColors.warmGray,
   },
-  helperText: {
-    fontFamily: SparkFonts.robotoRegular,
-    fontSize: 13 * S,
-    color: SparkColors.warmGray,
-    textAlign: 'center',
-    marginTop: 8 * S,
+  sessionRight: { flexDirection: 'row', alignItems: 'center', gap: 8 * S },
+  sessionScore: {
+    fontFamily: SparkFonts.outfitBold,
+    fontSize: 20 * S,
+    color: SparkColors.cocoaText,
   },
 
-  /* bottom button */
-  sheetFooter: {
-    paddingHorizontal: 24 * S,
-    paddingBottom: Platform.OS === 'ios' ? 36 * S : 20 * S,
-    paddingTop: 12 * S,
+  /* First use */
+  firstUseCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20 * S,
+    borderWidth: 1,
+    borderColor: SparkColors.warmBorder,
+    padding: 28 * S,
+    alignItems: 'center',
+    marginBottom: 20 * S,
   },
-  darkBtn: {
-    backgroundColor: SparkColors.cocoaCta,
-    borderRadius: 23 * S,
-    height: 52 * S,
+  firstUseIllustration: {
+    width: 80 * S,
+    height: 80 * S,
+    borderRadius: 40 * S,
+    backgroundColor: SparkColors.warmCanvas,
     alignItems: 'center',
     justifyContent: 'center',
+    marginBottom: 16 * S,
   },
-  darkBtnText: {
-    fontFamily: SparkFonts.robotoBold,
-    fontSize: 16 * S,
-    color: '#FFFCF5',
+  firstUseTitle: {
+    fontFamily: SparkFonts.outfitBold,
+    fontSize: 22 * S,
+    color: SparkColors.cocoaText,
+    marginBottom: 8 * S,
+  },
+  firstUseSub: {
+    fontFamily: SparkFonts.robotoRegular,
+    fontSize: 15 * S,
+    lineHeight: 22 * S,
+    color: SparkColors.warmGray,
+    textAlign: 'center',
+  },
+
+  /* Quick actions */
+  quickRow: { flexDirection: 'row', gap: 12 * S },
+  quickCard: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16 * S,
+    borderWidth: 1,
+    borderColor: SparkColors.warmBorder,
+    padding: 16 * S,
+  },
+  quickTitle: {
+    fontFamily: SparkFonts.robotoMedium,
+    fontSize: 15 * S,
+    color: SparkColors.cocoaText,
+    marginTop: 10 * S,
+    marginBottom: 4 * S,
+  },
+  quickSub: {
+    fontFamily: SparkFonts.robotoRegular,
+    fontSize: 13 * S,
+    color: SparkColors.warmGray,
   },
 });
