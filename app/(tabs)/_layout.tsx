@@ -1,21 +1,12 @@
-import React, { useCallback } from 'react';
-import { View, Text, Pressable, StyleSheet, Dimensions, Platform } from 'react-native';
-import { Tabs, usePathname } from 'expo-router';
+import React, { useEffect, useRef } from 'react';
+import { View, Text, Pressable, StyleSheet, Dimensions, Platform, Animated } from 'react-native';
+import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withSpring,
-  interpolate,
-  useDerivedValue,
-} from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { SparkColors, SparkFonts } from '@/constants/Spark';
 
 const { width: SW } = Dimensions.get('window');
 const S = SW / 390;
-
-const SPRING_CONFIG = { damping: 15, stiffness: 150, mass: 0.8 };
 
 const TAB_DEFS = [
   { key: 'index', icon: 'home-outline' as const, iconFocused: 'home' as const, label: 'Home' },
@@ -25,10 +16,8 @@ const TAB_DEFS = [
 ];
 
 /* ------------------------------------------------------------------ */
-/*  Animated single tab                                               */
+/*  Animated single tab — uses RN Animated with spring                */
 /* ------------------------------------------------------------------ */
-const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
-
 function AnimatedTab({
   def,
   focused,
@@ -38,64 +27,87 @@ function AnimatedTab({
   focused: boolean;
   onPress: () => void;
 }) {
-  const progress = useSharedValue(focused ? 1 : 0);
+  const progress = useRef(new Animated.Value(focused ? 1 : 0)).current;
 
-  useDerivedValue(() => {
-    progress.value = withSpring(focused ? 1 : 0, SPRING_CONFIG);
+  useEffect(() => {
+    Animated.spring(progress, {
+      toValue: focused ? 1 : 0,
+      damping: 15,
+      stiffness: 150,
+      mass: 0.8,
+      useNativeDriver: false,
+    }).start();
   }, [focused]);
 
-  const pillStyle = useAnimatedStyle(() => ({
-    backgroundColor: `rgba(255, 197, 1, ${progress.value})`,
-    paddingHorizontal: interpolate(progress.value, [0, 1], [0, 16 * S]),
-    borderRadius: 22 * S,
-    paddingVertical: 8 * S,
-    flexDirection: 'row' as const,
-    alignItems: 'center' as const,
-    justifyContent: 'center' as const,
-    gap: interpolate(progress.value, [0, 1], [0, 6 * S]),
-  }));
+  const pillBg = progress.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['rgba(255,197,1,0)', 'rgba(255,197,1,1)'],
+  });
 
-  const labelStyle = useAnimatedStyle(() => ({
-    opacity: progress.value,
-    transform: [{ scale: interpolate(progress.value, [0, 1], [0.5, 1]) }],
-    maxWidth: interpolate(progress.value, [0, 1], [0, 80 * S]),
-    overflow: 'hidden' as const,
-  }));
+  const paddingH = progress.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0, 16 * S],
+  });
 
-  const iconStyle = useAnimatedStyle(() => ({
-    transform: [
-      {
-        scale: interpolate(
-          progress.value,
-          [0, 0.5, 1],
-          [1, 1.15, 1],
-        ),
-      },
-    ],
-  }));
+  const labelOpacity = progress;
+
+  const labelScale = progress.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0.5, 1],
+  });
+
+  const labelMaxW = progress.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0, 80 * S],
+  });
+
+  const iconScale = progress.interpolate({
+    inputRange: [0, 0.5, 1],
+    outputRange: [1, 1.15, 1],
+  });
 
   return (
-    <AnimatedPressable onPress={onPress} style={pillStyle} hitSlop={8}>
-      <Animated.View style={iconStyle}>
-        <Ionicons
-          name={focused ? def.iconFocused : def.icon}
-          size={22 * S}
-          color={focused ? SparkColors.cocoaText : SparkColors.chevron}
-        />
-      </Animated.View>
-      <Animated.View style={labelStyle}>
-        <Text
-          numberOfLines={1}
+    <Pressable onPress={onPress} hitSlop={8}>
+      <Animated.View
+        style={{
+          backgroundColor: pillBg,
+          paddingHorizontal: paddingH,
+          borderRadius: 22 * S,
+          paddingVertical: 8 * S,
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: 6 * S,
+        }}
+      >
+        <Animated.View style={{ transform: [{ scale: iconScale }] }}>
+          <Ionicons
+            name={focused ? def.iconFocused : def.icon}
+            size={22 * S}
+            color={focused ? SparkColors.cocoaText : SparkColors.chevron}
+          />
+        </Animated.View>
+        <Animated.View
           style={{
-            fontFamily: SparkFonts.robotoMedium,
-            fontSize: 13 * S,
-            color: SparkColors.cocoaText,
+            opacity: labelOpacity,
+            transform: [{ scale: labelScale }],
+            maxWidth: labelMaxW,
+            overflow: 'hidden',
           }}
         >
-          {def.label}
-        </Text>
+          <Text
+            numberOfLines={1}
+            style={{
+              fontFamily: SparkFonts.robotoMedium,
+              fontSize: 13 * S,
+              color: SparkColors.cocoaText,
+            }}
+          >
+            {def.label}
+          </Text>
+        </Animated.View>
       </Animated.View>
-    </AnimatedPressable>
+    </Pressable>
   );
 }
 

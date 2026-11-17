@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import {
   View,
   Text,
@@ -7,19 +7,11 @@ import {
   Dimensions,
   Pressable,
   Image,
+  Animated,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withSpring,
-  withDelay,
-  interpolate,
-  Extrapolation,
-  runOnJS,
-} from 'react-native-reanimated';
 import { SparkColors, SparkFonts } from '@/constants/Spark';
 import { useStore } from '@/store/useStore';
 import { MOCK_TAKES } from '@/data/mockData';
@@ -27,11 +19,7 @@ import { MOCK_TAKES } from '@/data/mockData';
 const { width: SW, height: SH } = Dimensions.get('window');
 const S = SW / 390;
 
-const SPRING = { damping: 14, stiffness: 120, mass: 0.8 };
-
-const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
-
-/* ---------- FadeInView wrapper ---------- */
+/* ---------- FadeInView wrapper (RN Animated + spring) ---------- */
 function FadeInView({
   children,
   delay = 0,
@@ -41,17 +29,33 @@ function FadeInView({
   delay?: number;
   style?: any;
 }) {
-  const progress = useSharedValue(0);
+  const progress = useRef(new Animated.Value(0)).current;
+
   useEffect(() => {
-    progress.value = withDelay(delay, withSpring(1, SPRING));
+    const timer = setTimeout(() => {
+      Animated.spring(progress, {
+        toValue: 1,
+        damping: 14,
+        stiffness: 120,
+        mass: 0.8,
+        useNativeDriver: true,
+      }).start();
+    }, delay);
+    return () => clearTimeout(timer);
   }, []);
-  const anim = useAnimatedStyle(() => ({
-    opacity: progress.value,
-    transform: [
-      { translateY: interpolate(progress.value, [0, 1], [18, 0], Extrapolation.CLAMP) },
-    ],
-  }));
-  return <Animated.View style={[anim, style]}>{children}</Animated.View>;
+
+  const opacity = progress;
+  const translateY = progress.interpolate({
+    inputRange: [0, 1],
+    outputRange: [18, 0],
+    extrapolate: 'clamp',
+  });
+
+  return (
+    <Animated.View style={[{ opacity, transform: [{ translateY }] }, style]}>
+      {children}
+    </Animated.View>
+  );
 }
 
 export default function HomeScreen() {
@@ -59,24 +63,6 @@ export default function HomeScreen() {
   const { user } = useStore();
   const hasRecordings = MOCK_TAKES.length > 0;
   const latestTake = MOCK_TAKES[0];
-
-  /* bottom sheet for new recording */
-  const [sheetOpen, setSheetOpen] = useState(false);
-  const sheetY = useSharedValue(SH);
-
-  const openSheet = useCallback(() => {
-    setSheetOpen(true);
-    sheetY.value = withSpring(0, { damping: 20, stiffness: 140 });
-  }, []);
-
-  const closeSheet = useCallback(() => {
-    sheetY.value = withSpring(SH, { damping: 20, stiffness: 140 });
-    setTimeout(() => setSheetOpen(false), 400);
-  }, []);
-
-  const sheetStyle = useAnimatedStyle(() => ({
-    transform: [{ translateY: sheetY.value }],
-  }));
 
   const dur = latestTake
     ? `${Math.floor(latestTake.durationSec / 60)}:${String(latestTake.durationSec % 60).padStart(2, '0')}`
@@ -105,7 +91,7 @@ export default function HomeScreen() {
           <>
             {/* Hero card — latest session */}
             <FadeInView delay={80}>
-              <AnimatedPressable
+              <Pressable
                 style={s.heroCard}
                 onPress={() =>
                   router.push({
@@ -123,14 +109,14 @@ export default function HomeScreen() {
                   <Text style={s.heroDur}>{dur}</Text>
                 </View>
                 <Text style={s.heroDate}>{latestTake.date}</Text>
-              </AnimatedPressable>
+              </Pressable>
             </FadeInView>
 
             {/* Previous sessions */}
             <FadeInView delay={160}>
               <Text style={s.sectionLabel}>Previous sessions</Text>
               {MOCK_TAKES.slice(1, 4).map((take) => (
-                <AnimatedPressable
+                <Pressable
                   key={take.id}
                   style={s.sessionRow}
                   onPress={() =>
@@ -148,7 +134,7 @@ export default function HomeScreen() {
                     <Text style={s.sessionScore}>{take.score}</Text>
                     <Ionicons name="chevron-forward" size={16 * S} color={SparkColors.chevron} />
                   </View>
-                </AnimatedPressable>
+                </Pressable>
               ))}
             </FadeInView>
           </>
@@ -172,22 +158,22 @@ export default function HomeScreen() {
         <FadeInView delay={240}>
           <Text style={s.sectionLabel}>Quick start</Text>
           <View style={s.quickRow}>
-            <AnimatedPressable
+            <Pressable
               style={s.quickCard}
               onPress={() => router.push('/lessons/practice')}
             >
               <Ionicons name="mic-outline" size={24 * S} color={SparkColors.brandOrange} />
               <Text style={s.quickTitle}>Free practice</Text>
               <Text style={s.quickSub}>Record & get feedback</Text>
-            </AnimatedPressable>
-            <AnimatedPressable
+            </Pressable>
+            <Pressable
               style={s.quickCard}
               onPress={() => router.push('/lessons/detail?lessonId=pause')}
             >
               <Ionicons name="book-outline" size={24 * S} color={SparkColors.brandOrange} />
               <Text style={s.quickTitle}>Browse lessons</Text>
               <Text style={s.quickSub}>Guided skill building</Text>
-            </AnimatedPressable>
+            </Pressable>
           </View>
         </FadeInView>
 
@@ -257,7 +243,7 @@ const s = StyleSheet.create({
   heroScore: {
     fontFamily: SparkFonts.outfitBold,
     fontSize: 36 * S,
-    color: SparkColors.coral || SparkColors.orangeScore,
+    color: SparkColors.coral || SparkColors.brandOrange,
   },
   heroScoreMax: {
     fontFamily: SparkFonts.robotoRegular,
