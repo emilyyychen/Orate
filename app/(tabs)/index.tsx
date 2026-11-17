@@ -10,522 +10,485 @@ import { SparkColors, SparkFonts, SparkTypography } from '@/constants/Spark';
 const { width: SW, height: SH } = Dimensions.get('window');
 const S = SW / 390;
 
-/* ───── decorative dots ───── */
-const DOTS = [
-  { size: 18, x: 50, y: 60, opacity: 0.25, color: SparkColors.brandOrange },
-  { size: 12, x: 130, y: 40, opacity: 0.18, color: SparkColors.brandOrange },
-  { size: 22, x: 220, y: 55, opacity: 0.22, color: SparkColors.brandOrange },
-  { size: 10, x: 300, y: 35, opacity: 0.15, color: SparkColors.brandOrange },
-  { size: 16, x: 340, y: 70, opacity: 0.20, color: SparkColors.brandOrange },
-  { size: 14, x: 85, y: 95, opacity: 0.16, color: SparkColors.peach },
-  { size: 20, x: 270, y: 90, opacity: 0.20, color: SparkColors.peach },
-  { size: 8, x: 180, y: 80, opacity: 0.14, color: SparkColors.brandOrange },
-  { size: 11, x: 25, y: 110, opacity: 0.12, color: SparkColors.brandOrange },
-  { size: 15, x: 350, y: 110, opacity: 0.18, color: SparkColors.peach },
+/* ───── background pattern data ───── */
+type Shape = { type: 'square' | 'circle'; x: number; y: number };
+const PATTERN_SHAPES: Shape[] = [
+  // Row 0 (y=0)
+  { type: 'square', x: -3, y: 0 }, { type: 'circle', x: 61, y: 0 },
+  { type: 'square', x: 125, y: 0 }, { type: 'square', x: 253, y: 0 },
+  { type: 'square', x: 317, y: 0 }, { type: 'circle', x: 381, y: 0 },
+  // Row 1 (y=64)
+  { type: 'circle', x: -3, y: 64 }, { type: 'square', x: 61, y: 64 },
+  { type: 'square', x: 189, y: 64 }, { type: 'circle', x: 253, y: 64 },
+  { type: 'circle', x: 317, y: 64 }, { type: 'square', x: 381, y: 64 },
+  // Row 2 (y=128)
+  { type: 'square', x: -3, y: 128 }, { type: 'square', x: 125, y: 128 },
+  { type: 'circle', x: 189, y: 128 }, { type: 'square', x: 253, y: 128 },
+  { type: 'square', x: 317, y: 128 },
+  // Row 3 (y=192)
+  { type: 'square', x: 61, y: 192 }, { type: 'circle', x: 125, y: 192 },
+  { type: 'square', x: 189, y: 192 }, { type: 'square', x: 381, y: 192 },
+  // Row 4 (y=256)
+  { type: 'square', x: -3, y: 256 }, { type: 'circle', x: 61, y: 256 },
+  { type: 'square', x: 125, y: 256 }, { type: 'square', x: 253, y: 256 },
+  { type: 'square', x: 317, y: 256 }, { type: 'circle', x: 381, y: 256 },
+  // Row 5 (y=320)
+  { type: 'square', x: -3, y: 320 }, { type: 'circle', x: 61, y: 320 },
+  { type: 'square', x: 125, y: 320 }, { type: 'square', x: 253, y: 320 },
+  { type: 'square', x: 317, y: 320 }, { type: 'circle', x: 381, y: 320 },
 ];
+const SHAPE_SIZE = 56;
+const PATTERN_H = 384; // pattern area height
+const YELLOW_COLOR = '#FDE068';
+const CORAL_COLOR = '#F0A090';
 
-/* ───── occasion options (step 1, multi-select) ───── */
+function BackgroundPattern() {
+  return (
+    <View style={patStyles.wrap} pointerEvents="none">
+      {PATTERN_SHAPES.map((s, i) => {
+        // fade out toward bottom of pattern
+        const rowOpacity = Math.max(0.03, 0.14 - (s.y / PATTERN_H) * 0.14);
+        const size = SHAPE_SIZE * S;
+        return (
+          <View
+            key={i}
+            style={{
+              position: 'absolute',
+              left: s.x * S,
+              top: s.y * S,
+              width: size,
+              height: size,
+              borderRadius: s.type === 'circle' ? size / 2 : 12 * S,
+              backgroundColor: s.type === 'square' ? YELLOW_COLOR : CORAL_COLOR,
+              opacity: rowOpacity,
+            }}
+          />
+        );
+      })}
+    </View>
+  );
+}
+const patStyles = StyleSheet.create({
+  wrap: { position: 'absolute', top: 0, left: 0, width: SW, height: PATTERN_H * S, overflow: 'hidden' },
+});
+
+/* ───── occasion choices ───── */
 const OCCASIONS = [
   { id: 'interview', label: 'A job interview', icon: 'briefcase-outline' as const },
   { id: 'pitch', label: 'A pitch', icon: 'chatbubble-outline' as const },
-  { id: 'keynote', label: 'A keynote', icon: 'easel-outline' as const },
+  { id: 'keynote', label: 'A keynote', icon: 'mic-outline' as const },
   { id: 'lecture', label: 'A class or lecture', icon: 'school-outline' as const },
   { id: 'toast', label: 'A toast', icon: 'wine-outline' as const },
-  { id: 'other', label: 'Other', icon: 'ellipsis-horizontal-circle-outline' as const },
+  { id: 'other', label: 'Other', icon: 'happy-outline' as const },
 ];
 
-/* ───── material options (step 2) ───── */
+/* ───── material choices ───── */
 const MATERIALS = [
   { id: 'script', title: 'Paste script', desc: 'Type or paste your speech text', icon: 'document-text-outline' as const },
   { id: 'upload', title: 'Upload audio or video', desc: 'Choose an audio or video file', icon: 'cloud-upload-outline' as const },
 ];
 
-/* ───── time options (step 3, single-select) ───── */
+/* ───── time choices ───── */
 const TIMES = [
-  { id: '1', label: '1 minute' },
-  { id: '3', label: '3 minutes' },
-  { id: '5', label: '5 minutes' },
-  { id: '15', label: '15 minutes' },
-  { id: 'custom', label: 'Customize...' },
+  { id: '1', label: '1 minute', icon: 'time-outline' as const },
+  { id: '3', label: '3 minutes', icon: 'time-outline' as const },
+  { id: '5', label: '5 minutes', icon: 'time-outline' as const },
+  { id: '15', label: '15 minutes', icon: 'time-outline' as const },
+  { id: 'custom', label: 'Customize...', icon: 'time-outline' as const },
 ];
 
-/* ━━━━━ HOME SCREEN ━━━━━ */
+/* ───── bottom sheet constants ───── */
+const SHEET_TOP = SH * 0.166; // Figma: y=140/844
+const SHEET_RADIUS = 32 * S;
+
+/* ═══════════════════════════════════════════ */
 export default function HomeScreen() {
-  const [showSetup, setShowSetup] = useState(false);
+  const [showSheet, setShowSheet] = useState(false);
+  const [step, setStep] = useState(1); // 1-3
+  const [sessionName, setSessionName] = useState('');
+  const [occasion, setOccasion] = useState('');
+  const [material, setMaterial] = useState('');
+  const [timeChoice, setTimeChoice] = useState('');
 
+  const slideAnim = useRef(new Animated.Value(SH)).current;
+
+  /* open sheet */
+  const openSheet = () => {
+    setStep(1);
+    setShowSheet(true);
+    Animated.spring(slideAnim, { toValue: 0, useNativeDriver: true, tension: 65, friction: 11 }).start();
+  };
+  /* close sheet */
+  const closeSheet = () => {
+    Animated.timing(slideAnim, { toValue: SH, duration: 250, useNativeDriver: true }).start(() => {
+      setShowSheet(false);
+      setStep(1);
+      setSessionName('');
+      setOccasion('');
+      setMaterial('');
+      setTimeChoice('');
+    });
+  };
+  /* next / back */
+  const next = () => { if (step < 3) setStep(step + 1); };
+  const back = () => { if (step > 1) setStep(step - 1); else closeSheet(); };
+
+  /* ── render ── */
   return (
-    <SafeAreaView style={styles.safe} edges={['top']}>
-      <View style={styles.container}>
-        {/* header */}
-        <View style={styles.header}>
-          <Image source={require('@/assets/images/orate-logo.png')} style={styles.logoImg} resizeMode="contain" />
-          <Text style={styles.logoText}>Orate</Text>
-        </View>
+    <View style={styles.root}>
+      {/* cream background + pattern */}
+      <BackgroundPattern />
 
-        {/* decorative dots */}
-        {DOTS.map((d, i) => (
-          <View
-            key={i}
-            style={{
-              position: 'absolute',
-              width: d.size * S,
-              height: d.size * S,
-              borderRadius: (d.size * S) / 2,
-              backgroundColor: d.color,
-              opacity: d.opacity,
-              left: d.x * S,
-              top: d.y * S + 44 * S,
-            }}
-          />
-        ))}
+      <SafeAreaView style={styles.safe} edges={['top']}>
+        {/* ─── Home content ─── */}
+        <View style={styles.homeContent}>
+          {/* Top-left logo */}
+          <Image source={require('@/assets/images/orate-logo.png')} style={styles.logo} resizeMode="contain" />
 
-        {/* center content */}
-        <View style={styles.centerContent}>
-          <Image
-            source={require('@/assets/images/orate-character.png')}
-            style={styles.character}
-            resizeMode="contain"
-          />
-          <Text style={styles.headline}>Let's record your{'\n'}first section</Text>
-          <Text style={styles.subtitle}>Set up a session, then press record.</Text>
-        </View>
+          {/* Character + text */}
+          <View style={styles.hero}>
+            <Image source={require('@/assets/images/orate-character.png')} style={styles.character} resizeMode="contain" />
+            <Text style={styles.heroTitle}>Let's record your{'\n'}first session</Text>
+            <Text style={styles.heroSub}>Practice makes perfect — start with{'\n'}a quick recording to warm up.</Text>
+          </View>
 
-        {/* CTA */}
-        <View style={styles.ctaWrap}>
-          <TouchableOpacity style={styles.ctaButton} activeOpacity={0.85} onPress={() => setShowSetup(true)}>
+          {/* CTA */}
+          <TouchableOpacity style={styles.ctaBtn} activeOpacity={0.85} onPress={openSheet}>
             <Text style={styles.ctaText}>Start my first recording</Text>
           </TouchableOpacity>
         </View>
-      </View>
+      </SafeAreaView>
 
-      {/* session setup bottom sheet */}
-      {showSetup && <SessionSetupSheet onClose={() => setShowSetup(false)} />}
-    </SafeAreaView>
-  );
-}
-
-/* ━━━━━ SESSION SETUP BOTTOM SHEET ━━━━━ */
-function SessionSetupSheet({ onClose }: { onClose: () => void }) {
-  const [step, setStep] = useState(1);
-  const slideAnim = useRef(new Animated.Value(SH)).current;
-
-  /* session state */
-  const [sessionName, setSessionName] = useState('');
-  const [selectedOccasions, setSelectedOccasions] = useState<string[]>([]);
-  const [selectedTime, setSelectedTime] = useState<string | null>(null);
-
-  useEffect(() => {
-    Animated.spring(slideAnim, {
-      toValue: 0,
-      useNativeDriver: true,
-      damping: 20,
-      stiffness: 180,
-    }).start();
-  }, []);
-
-  const dismiss = () => {
-    Animated.timing(slideAnim, { toValue: SH, duration: 250, useNativeDriver: true }).start(() => onClose());
-  };
-
-  const toggleOccasion = (id: string) => {
-    setSelectedOccasions(prev =>
-      prev.includes(id) ? prev.filter(o => o !== id) : [...prev, id]
-    );
-  };
-
-  const goNext = () => { if (step < 3) setStep(step + 1); };
-  const goBack = () => { if (step > 1) setStep(step - 1); };
-
-  return (
-    <Modal transparent animationType="none" statusBarTranslucent>
-      <View style={sheet.overlay}>
-        <TouchableOpacity style={sheet.overlayTouch} activeOpacity={1} onPress={dismiss} />
-        <Animated.View style={[sheet.sheetWrap, { transform: [{ translateY: slideAnim }] }]}>
-          <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }}>
-            {/* sheet header */}
-            <View style={sheet.sheetHeader}>
-              <View style={sheet.headerRow}>
+      {/* ═══ Bottom Sheet (modal) ═══ */}
+      <Modal visible={showSheet} transparent animationType="none" statusBarTranslucent>
+        <View style={styles.overlay}>
+          <Animated.View style={[styles.sheet, { transform: [{ translateY: slideAnim }] }]}>
+            <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }}>
+              {/* ── sheet header ── */}
+              <View style={styles.sheetHeader}>
                 {step > 1 ? (
-                  <TouchableOpacity onPress={goBack} style={sheet.headerBtn}>
-                    <Ionicons name="chevron-back" size={24 * S} color={SparkColors.cocoaText} />
+                  <TouchableOpacity onPress={back} hitSlop={12} style={styles.headerBtn}>
+                    <Ionicons name="arrow-back" size={22 * S} color={SparkColors.cocoaText} />
                   </TouchableOpacity>
                 ) : (
-                  <View style={sheet.headerBtn} />
+                  <View style={styles.headerBtn} />
                 )}
-                {/* Orate logo center */}
-                <View style={sheet.headerCenter}>
-                  <Image source={require('@/assets/images/orate-logo.png')} style={sheet.sheetLogo} resizeMode="contain" />
-                  <Text style={sheet.sheetLogoText}>Orate</Text>
-                </View>
-                <TouchableOpacity onPress={dismiss} style={sheet.headerBtn}>
-                  <Ionicons name="close" size={24 * S} color={SparkColors.cocoaText} />
+                <View style={{ flex: 1 }} />
+                <TouchableOpacity onPress={closeSheet} hitSlop={12} style={styles.headerBtn}>
+                  <Ionicons name="close" size={22 * S} color={SparkColors.cocoaText} />
                 </TouchableOpacity>
               </View>
-            </View>
 
-            <ScrollView
-              style={sheet.scrollBody}
-              contentContainerStyle={sheet.scrollContent}
-              showsVerticalScrollIndicator={false}
-              keyboardShouldPersistTaps="handled"
-            >
-              {step === 1 && <Step1 sessionName={sessionName} setSessionName={setSessionName} selectedOccasions={selectedOccasions} toggleOccasion={toggleOccasion} />}
-              {step === 2 && <Step2 />}
-              {step === 3 && <Step3 selectedTime={selectedTime} setSelectedTime={setSelectedTime} />}
-            </ScrollView>
+              <ScrollView
+                style={styles.sheetScroll}
+                contentContainerStyle={styles.sheetScrollContent}
+                showsVerticalScrollIndicator={false}
+                keyboardShouldPersistTaps="handled"
+              >
+                {/* step indicator */}
+                <Text style={styles.stepLabel}>{step} of 3</Text>
 
-            {/* bottom CTA */}
-            <View style={sheet.bottomCta}>
-              {step === 1 && (
-                <TouchableOpacity style={sheet.darkBtn} activeOpacity={0.85} onPress={goNext}>
-                  <Text style={sheet.darkBtnText}>Next</Text>
+                {/* ═══ STEP 1 ═══ */}
+                {step === 1 && (
+                  <>
+                    <Text style={styles.sheetTitle}>Set up your recording</Text>
+
+                    {/* session name */}
+                    <Text style={styles.fieldLabel}>Recording name</Text>
+                    <TextInput
+                      style={styles.input}
+                      placeholder="e.g. Capstone presentation"
+                      placeholderTextColor={SparkColors.paleGray}
+                      value={sessionName}
+                      onChangeText={setSessionName}
+                    />
+
+                    {/* occasion */}
+                    <Text style={styles.fieldLabel}>What's the occasion?</Text>
+                    {OCCASIONS.map((o) => (
+                      <TouchableOpacity
+                        key={o.id}
+                        style={[styles.optionRow, occasion === o.id && styles.optionRowActive]}
+                        activeOpacity={0.7}
+                        onPress={() => setOccasion(o.id)}
+                      >
+                        <Ionicons name={o.icon} size={20 * S} color={SparkColors.brandOrange} />
+                        <Text style={styles.optionText}>{o.label}</Text>
+                        <View style={styles.radioOuter}>
+                          {occasion === o.id && <View style={styles.radioInner} />}
+                        </View>
+                      </TouchableOpacity>
+                    ))}
+                  </>
+                )}
+
+                {/* ═══ STEP 2 ═══ */}
+                {step === 2 && (
+                  <>
+                    <Text style={styles.sheetTitle}>Add your material</Text>
+                    <Text style={styles.sheetSub}>Optionally add a script or recording to compare against.</Text>
+
+                    {MATERIALS.map((m) => (
+                      <TouchableOpacity
+                        key={m.id}
+                        style={[styles.materialCard, material === m.id && styles.materialCardActive]}
+                        activeOpacity={0.7}
+                        onPress={() => setMaterial(m.id)}
+                      >
+                        <Ionicons name={m.icon} size={20 * S} color={SparkColors.brandOrange} style={{ marginTop: 2 * S }} />
+                        <View style={styles.materialTextWrap}>
+                          <Text style={styles.materialTitle}>{m.title}</Text>
+                          <Text style={styles.materialDesc}>{m.desc}</Text>
+                        </View>
+                      </TouchableOpacity>
+                    ))}
+
+                    <Text style={styles.helperText}>
+                      You can always add or change this later.
+                    </Text>
+                  </>
+                )}
+
+                {/* ═══ STEP 3 ═══ */}
+                {step === 3 && (
+                  <>
+                    <Text style={styles.sheetTitle}>Time</Text>
+                    <Text style={styles.sheetSub}>Set a target duration for your session.</Text>
+
+                    {TIMES.map((t) => (
+                      <TouchableOpacity
+                        key={t.id}
+                        style={[styles.optionRow, timeChoice === t.id && styles.optionRowActive]}
+                        activeOpacity={0.7}
+                        onPress={() => setTimeChoice(t.id)}
+                      >
+                        <Ionicons name={t.icon} size={20 * S} color={SparkColors.brandOrange} />
+                        <Text style={styles.optionText}>{t.label}</Text>
+                        <View style={styles.radioOuter}>
+                          {timeChoice === t.id && <View style={styles.radioInner} />}
+                        </View>
+                      </TouchableOpacity>
+                    ))}
+                  </>
+                )}
+              </ScrollView>
+
+              {/* ── bottom button ── */}
+              <View style={styles.sheetFooter}>
+                <TouchableOpacity
+                  style={styles.darkBtn}
+                  activeOpacity={0.85}
+                  onPress={step < 3 ? next : closeSheet}
+                >
+                  <Text style={styles.darkBtnText}>
+                    {step === 1 ? 'Next' : step === 2 ? 'Continue without material' : 'Skip for now'}
+                  </Text>
                 </TouchableOpacity>
-              )}
-              {step === 2 && (
-                <TouchableOpacity style={sheet.darkBtn} activeOpacity={0.85} onPress={goNext}>
-                  <Text style={sheet.darkBtnText}>Continue without material</Text>
-                </TouchableOpacity>
-              )}
-              {step === 3 && (
-                <TouchableOpacity style={sheet.creamBtn} activeOpacity={0.85} onPress={dismiss}>
-                  <Text style={sheet.creamBtnText}>Skip for now</Text>
-                </TouchableOpacity>
-              )}
-            </View>
-          </KeyboardAvoidingView>
-        </Animated.View>
-      </View>
-    </Modal>
-  );
-}
-
-/* ───── step 1: set up your recording ───── */
-function Step1({
-  sessionName, setSessionName, selectedOccasions, toggleOccasion,
-}: {
-  sessionName: string; setSessionName: (v: string) => void;
-  selectedOccasions: string[]; toggleOccasion: (id: string) => void;
-}) {
-  return (
-    <View>
-      <Text style={sheet.stepLabel}>1 of 3</Text>
-      <Text style={sheet.stepTitle}>Set up your recording</Text>
-
-      {/* session name */}
-      <Text style={sheet.inputLabel}>Session name · optional</Text>
-      <TextInput
-        style={sheet.textInput}
-        placeholder="e.g. My presentation"
-        placeholderTextColor={SparkColors.paleGray}
-        value={sessionName}
-        onChangeText={setSessionName}
-      />
-
-      {/* occasion list */}
-      <Text style={sheet.sectionTitle}>What are you preparing for?</Text>
-      {OCCASIONS.map(occ => {
-        const selected = selectedOccasions.includes(occ.id);
-        return (
-          <TouchableOpacity
-            key={occ.id}
-            style={[sheet.optionRow, selected && sheet.optionRowSelected]}
-            activeOpacity={0.7}
-            onPress={() => toggleOccasion(occ.id)}
-          >
-            <View style={[sheet.optionIcon, selected && sheet.optionIconSelected]}>
-              <Ionicons name={occ.icon} size={18 * S} color={selected ? SparkColors.brandOrange : SparkColors.warmGray} />
-            </View>
-            <Text style={[sheet.optionText, selected && sheet.optionTextSelected]}>{occ.label}</Text>
-            <View style={[sheet.radio, selected && sheet.radioSelected]}>
-              {selected && <View style={sheet.radioDot} />}
-            </View>
-          </TouchableOpacity>
-        );
-      })}
+              </View>
+            </KeyboardAvoidingView>
+          </Animated.View>
+        </View>
+      </Modal>
     </View>
   );
 }
 
-/* ───── step 2: add your material ───── */
-function Step2() {
-  return (
-    <View>
-      <Text style={sheet.stepLabel}>2 of 3</Text>
-      <Text style={sheet.stepTitle}>Add your material</Text>
-      <Text style={sheet.stepSubtitle}>Add a script, audio or video for feedback.</Text>
-
-      {MATERIALS.map(mat => (
-        <TouchableOpacity key={mat.id} style={sheet.materialCard} activeOpacity={0.7}>
-          <View style={sheet.materialIcon}>
-            <Ionicons name={mat.icon} size={22 * S} color={SparkColors.brandOrange} />
-          </View>
-          <View style={sheet.materialInfo}>
-            <Text style={sheet.materialTitle}>{mat.title}</Text>
-            <Text style={sheet.materialDesc}>{mat.desc}</Text>
-          </View>
-        </TouchableOpacity>
-      ))}
-
-      <Text style={sheet.helperNote}>No material yet? You can record in the app.</Text>
-    </View>
-  );
-}
-
-/* ───── step 3: time ───── */
-function Step3({
-  selectedTime, setSelectedTime,
-}: {
-  selectedTime: string | null; setSelectedTime: (v: string) => void;
-}) {
-  return (
-    <View>
-      <Text style={sheet.stepLabel}>3 of 3</Text>
-      <Text style={sheet.stepTitle}>Time</Text>
-      <Text style={sheet.stepSubtitle}>Choose a target, or record without a time limit.</Text>
-
-      {TIMES.map(t => {
-        const selected = selectedTime === t.id;
-        return (
-          <TouchableOpacity
-            key={t.id}
-            style={[sheet.optionRow, selected && sheet.optionRowSelected]}
-            activeOpacity={0.7}
-            onPress={() => setSelectedTime(t.id)}
-          >
-            <View style={[sheet.optionIcon, selected && sheet.optionIconSelected]}>
-              <Ionicons name="time-outline" size={18 * S} color={selected ? SparkColors.brandOrange : SparkColors.warmGray} />
-            </View>
-            <Text style={[sheet.optionText, selected && sheet.optionTextSelected]}>{t.label}</Text>
-            <View style={[sheet.radio, selected && sheet.radioSelected]}>
-              {selected && <View style={sheet.radioDot} />}
-            </View>
-          </TouchableOpacity>
-        );
-      })}
-    </View>
-  );
-}
-
-/* ━━━━━ STYLES ━━━━━ */
+/* ═══════════ styles ═══════════ */
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: SparkColors.cream },
-  container: { flex: 1, backgroundColor: SparkColors.cream },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 20 * S,
-    paddingTop: 8 * S,
-    gap: 6 * S,
-  },
-  logoImg: { width: 32 * S, height: 32 * S },
-  logoText: {
-    fontFamily: SparkFonts.outfitBold,
-    fontSize: 20 * S,
-    color: SparkColors.brandOrange,
-  },
-  centerContent: {
+  root: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: SparkColors.cream,
+  },
+  safe: { flex: 1 },
+
+  /* ── home ── */
+  homeContent: {
+    flex: 1,
     paddingHorizontal: 24 * S,
   },
-  character: {
-    width: 140 * S,
-    height: 140 * S,
-    marginBottom: 20 * S,
+  logo: {
+    width: 80 * S,
+    height: 28 * S,
+    marginTop: 12 * S,
   },
-  headline: {
+  hero: {
+    alignItems: 'center',
+    marginTop: 60 * S,
+  },
+  character: {
+    width: 180 * S,
+    height: 180 * S,
+    marginBottom: 24 * S,
+  },
+  heroTitle: {
     fontFamily: SparkFonts.outfitBold,
-    fontSize: 24 * S,
-    lineHeight: 30 * S,
+    fontSize: 26 * S,
+    lineHeight: 34 * S,
     color: SparkColors.cocoaText,
     textAlign: 'center',
     marginBottom: 10 * S,
   },
-  subtitle: {
+  heroSub: {
     fontFamily: SparkFonts.robotoRegular,
     fontSize: 15 * S,
+    lineHeight: 22 * S,
     color: SparkColors.warmGray,
     textAlign: 'center',
   },
-  ctaWrap: {
-    paddingHorizontal: 24 * S,
-    paddingBottom: 16 * S,
-  },
-  ctaButton: {
+  ctaBtn: {
     backgroundColor: SparkColors.cocoaCta,
-    borderRadius: 14 * S,
-    paddingVertical: 16 * S,
+    borderRadius: 28 * S,
+    height: 56 * S,
     alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 'auto' as any,
+    marginBottom: 24 * S,
   },
   ctaText: {
-    fontFamily: SparkFonts.robotoBold,
+    fontFamily: SparkFonts.robotoMedium,
     fontSize: 16 * S,
     color: '#FFFFFF',
   },
-});
 
-/* ───── bottom sheet styles ───── */
-const SHEET_TOP = SH * 0.08;
-const sheet = StyleSheet.create({
-  overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.35)' },
-  overlayTouch: { height: SHEET_TOP },
-  sheetWrap: {
+  /* ── sheet ── */
+  overlay: {
     flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.25)',
+  },
+  sheet: {
+    position: 'absolute',
+    top: SHEET_TOP,
+    left: 0,
+    right: 0,
+    bottom: 0,
     backgroundColor: SparkColors.cream,
-    borderTopLeftRadius: 24 * S,
-    borderTopRightRadius: 24 * S,
-    overflow: 'hidden',
+    borderTopLeftRadius: SHEET_RADIUS,
+    borderTopRightRadius: SHEET_RADIUS,
   },
   sheetHeader: {
-    paddingTop: 16 * S,
-    paddingHorizontal: 16 * S,
-    paddingBottom: 8 * S,
-  },
-  headerRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    paddingHorizontal: 20 * S,
+    paddingTop: 20 * S,
+    paddingBottom: 8 * S,
   },
-  headerBtn: { width: 40 * S, alignItems: 'center' },
-  headerCenter: { flexDirection: 'row', alignItems: 'center', gap: 5 * S },
-  sheetLogo: { width: 24 * S, height: 24 * S },
-  sheetLogoText: {
-    fontFamily: SparkFonts.outfitBold,
-    fontSize: 17 * S,
-    color: SparkColors.brandOrange,
+  headerBtn: {
+    width: 36 * S,
+    height: 36 * S,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  scrollBody: { flex: 1 },
-  scrollContent: { paddingHorizontal: 24 * S, paddingBottom: 20 * S },
+  sheetScroll: {
+    flex: 1,
+  },
+  sheetScrollContent: {
+    paddingHorizontal: 24 * S,
+    paddingBottom: 24 * S,
+  },
 
-  /* step text */
+  /* step indicator */
   stepLabel: {
-    fontFamily: SparkFonts.robotoRegular,
-    fontSize: 13 * S,
-    color: SparkColors.warmGray,
-    marginBottom: 6 * S,
-    marginTop: 8 * S,
-  },
-  stepTitle: {
-    fontFamily: SparkFonts.outfitBold,
-    fontSize: 22 * S,
-    color: SparkColors.cocoaText,
-    marginBottom: 16 * S,
-  },
-  stepSubtitle: {
-    fontFamily: SparkFonts.robotoRegular,
-    fontSize: 14 * S,
-    color: SparkColors.warmGray,
-    marginBottom: 20 * S,
-    marginTop: -8 * S,
-  },
-
-  /* input */
-  inputLabel: {
-    fontFamily: SparkFonts.robotoRegular,
+    fontFamily: SparkFonts.robotoMedium,
     fontSize: 13 * S,
     color: SparkColors.warmGray,
     marginBottom: 8 * S,
   },
-  textInput: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12 * S,
+  sheetTitle: {
+    fontFamily: SparkFonts.outfitBold,
+    fontSize: 24 * S,
+    color: SparkColors.cocoaText,
+    marginBottom: 20 * S,
+  },
+  sheetSub: {
+    fontFamily: SparkFonts.robotoRegular,
+    fontSize: 14 * S,
+    lineHeight: 20 * S,
+    color: SparkColors.warmGray,
+    marginTop: -12 * S,
+    marginBottom: 20 * S,
+  },
+
+  /* text input */
+  fieldLabel: {
+    fontFamily: SparkFonts.robotoMedium,
+    fontSize: 14 * S,
+    color: SparkColors.cocoaText,
+    marginBottom: 8 * S,
+  },
+  input: {
+    backgroundColor: SparkColors.warmCanvas,
+    borderRadius: 16 * S,
     borderWidth: 1,
     borderColor: SparkColors.warmBorder,
+    height: 50 * S,
     paddingHorizontal: 16 * S,
-    paddingVertical: 14 * S,
     fontFamily: SparkFonts.robotoRegular,
     fontSize: 15 * S,
     color: SparkColors.cocoaText,
-    marginBottom: 24 * S,
+    marginBottom: 20 * S,
   },
 
-  /* section */
-  sectionTitle: {
-    fontFamily: SparkFonts.robotoMedium,
-    fontSize: 15 * S,
-    color: SparkColors.cocoaText,
-    marginBottom: 12 * S,
-  },
-
-  /* option row (occasions / time) */
+  /* option rows (occasion & time) */
   optionRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 14 * S,
-    borderWidth: 1.5,
+    height: 49 * S,
+    borderRadius: 25 * S,
+    borderWidth: 1,
     borderColor: SparkColors.warmBorder,
-    paddingVertical: 14 * S,
-    paddingHorizontal: 14 * S,
+    backgroundColor: SparkColors.warmCanvas,
+    paddingHorizontal: 18 * S,
     marginBottom: 10 * S,
-    gap: 12 * S,
   },
-  optionRowSelected: {
-    backgroundColor: '#FFF8EC',
+  optionRowActive: {
     borderColor: SparkColors.brandOrange,
-  },
-  optionIcon: {
-    width: 36 * S,
-    height: 36 * S,
-    borderRadius: 18 * S,
-    backgroundColor: '#FFF6EE',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  optionIconSelected: {
-    backgroundColor: '#FFF0D4',
+    backgroundColor: '#FFF8EC',
   },
   optionText: {
     flex: 1,
-    fontFamily: SparkFonts.robotoMedium,
+    fontFamily: SparkFonts.robotoRegular,
     fontSize: 15 * S,
     color: SparkColors.cocoaText,
+    marginLeft: 14 * S,
   },
-  optionTextSelected: {
-    color: SparkColors.cocoaText,
-  },
-  radio: {
-    width: 22 * S,
-    height: 22 * S,
-    borderRadius: 11 * S,
+  radioOuter: {
+    width: 20 * S,
+    height: 20 * S,
+    borderRadius: 10 * S,
     borderWidth: 1.5,
     borderColor: SparkColors.warmBorder,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#FFFFFF',
   },
-  radioSelected: {
-    borderColor: SparkColors.brandOrange,
+  radioInner: {
+    width: 12 * S,
+    height: 12 * S,
+    borderRadius: 6 * S,
     backgroundColor: SparkColors.brandOrange,
   },
-  radioDot: {
-    width: 8 * S,
-    height: 8 * S,
-    borderRadius: 4 * S,
-    backgroundColor: '#FFFFFF',
-  },
 
-  /* material cards (step 2) */
+  /* material cards */
   materialCard: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-start',
+    height: 72 * S,
+    borderRadius: 20 * S,
+    borderWidth: 1,
+    borderColor: SparkColors.warmBorder,
     backgroundColor: SparkColors.warmCanvas,
-    borderRadius: 14 * S,
-    paddingVertical: 18 * S,
-    paddingHorizontal: 16 * S,
+    paddingHorizontal: 18 * S,
+    paddingVertical: 14 * S,
     marginBottom: 12 * S,
-    gap: 14 * S,
   },
-  materialIcon: {
-    width: 42 * S,
-    height: 42 * S,
-    borderRadius: 21 * S,
-    backgroundColor: '#FFF0D4',
-    alignItems: 'center',
-    justifyContent: 'center',
+  materialCardActive: {
+    borderColor: SparkColors.brandOrange,
+    backgroundColor: '#FFF8EC',
   },
-  materialInfo: { flex: 1 },
+  materialTextWrap: {
+    flex: 1,
+    marginLeft: 14 * S,
+  },
   materialTitle: {
     fontFamily: SparkFonts.robotoMedium,
     fontSize: 15 * S,
@@ -537,7 +500,7 @@ const sheet = StyleSheet.create({
     fontSize: 13 * S,
     color: SparkColors.warmGray,
   },
-  helperNote: {
+  helperText: {
     fontFamily: SparkFonts.robotoRegular,
     fontSize: 13 * S,
     color: SparkColors.warmGray,
@@ -545,33 +508,22 @@ const sheet = StyleSheet.create({
     marginTop: 8 * S,
   },
 
-  /* bottom buttons */
-  bottomCta: {
+  /* bottom button */
+  sheetFooter: {
     paddingHorizontal: 24 * S,
-    paddingTop: 12 * S,
     paddingBottom: Platform.OS === 'ios' ? 36 * S : 20 * S,
-    backgroundColor: SparkColors.cream,
+    paddingTop: 12 * S,
   },
   darkBtn: {
     backgroundColor: SparkColors.cocoaCta,
-    borderRadius: 14 * S,
-    paddingVertical: 16 * S,
+    borderRadius: 28 * S,
+    height: 52 * S,
     alignItems: 'center',
+    justifyContent: 'center',
   },
   darkBtnText: {
-    fontFamily: SparkFonts.robotoBold,
+    fontFamily: SparkFonts.robotoMedium,
     fontSize: 16 * S,
     color: '#FFFFFF',
-  },
-  creamBtn: {
-    backgroundColor: SparkColors.warmCanvas,
-    borderRadius: 14 * S,
-    paddingVertical: 16 * S,
-    alignItems: 'center',
-  },
-  creamBtnText: {
-    fontFamily: SparkFonts.robotoBold,
-    fontSize: 16 * S,
-    color: SparkColors.cocoaText,
   },
 });

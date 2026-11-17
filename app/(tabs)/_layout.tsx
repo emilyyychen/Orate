@@ -1,6 +1,6 @@
 import { Tabs } from 'expo-router';
 import React from 'react';
-import { View, Text, StyleSheet, Dimensions, Platform } from 'react-native';
+import { View, Text, StyleSheet, Dimensions, Platform, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { SparkColors, SparkFonts } from '@/constants/Spark';
 
@@ -13,14 +13,54 @@ function TabIcon({ focused, iconName, label }: TabIconProps) {
   if (focused) {
     return (
       <View style={tabStyles.activePill}>
-        <Ionicons name={iconName} size={20 * S} color="#FFFFFF" />
+        <Ionicons name={iconName} size={22 * S} color={SparkColors.cocoaText} />
         <Text style={tabStyles.activeLabel}>{label}</Text>
       </View>
     );
   }
   return (
     <View style={tabStyles.inactiveWrap}>
-      <Ionicons name={iconName} size={22 * S} color={SparkColors.paleGray} />
+      <Ionicons name={iconName} size={22 * S} color={SparkColors.warmGray} />
+    </View>
+  );
+}
+
+function CustomTabBar({ state, descriptors, navigation }: any) {
+  const tabs = [
+    { key: 'index', icon: 'home-outline' as const, iconFocused: 'home' as const, label: 'Home' },
+    { key: 'history', icon: 'time-outline' as const, iconFocused: 'time' as const, label: 'History' },
+    { key: 'script', icon: 'document-text-outline' as const, iconFocused: 'document-text' as const, label: 'Lessons' },
+    { key: 'profile', icon: 'person-outline' as const, iconFocused: 'person' as const, label: 'Profile' },
+  ];
+
+  return (
+    <View style={tabStyles.barOuter}>
+      <View style={tabStyles.barContainer}>
+        <View style={tabStyles.barInner}>
+          {state.routes.map((route: any, index: number) => {
+            const isFocused = state.index === index;
+            const tab = tabs[index];
+            if (!tab) return null;
+
+            const onPress = () => {
+              const event = navigation.emit({ type: 'tabPress', target: route.key, canPreventDefault: true });
+              if (!isFocused && !event.defaultPrevented) {
+                navigation.navigate(route.name);
+              }
+            };
+
+            return (
+              <TouchableOpacity key={route.key} onPress={onPress} activeOpacity={0.7} style={isFocused ? tabStyles.tabActive : tabStyles.tabInactive}>
+                <TabIcon
+                  focused={isFocused}
+                  iconName={isFocused ? tab.iconFocused : tab.icon}
+                  label={tab.label}
+                />
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+      </View>
     </View>
   );
 }
@@ -29,76 +69,62 @@ const tabStyles = StyleSheet.create({
   activePill: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: SparkColors.cocoaCta,
-    borderRadius: 20 * S,
-    paddingHorizontal: 14 * S,
-    paddingVertical: 8 * S,
-    gap: 6 * S,
+    backgroundColor: SparkColors.brandOrange,
+    borderRadius: 24 * S,
+    paddingHorizontal: 16 * S,
+    paddingVertical: 10 * S,
+    gap: 8 * S,
   },
   activeLabel: {
     fontFamily: SparkFonts.robotoMedium,
-    fontSize: 13 * S,
-    color: '#FFFFFF',
+    fontSize: 14 * S,
+    color: SparkColors.cocoaText,
   },
   inactiveWrap: {
     alignItems: 'center',
     justifyContent: 'center',
+    paddingVertical: 10 * S,
+  },
+  barOuter: {
+    backgroundColor: SparkColors.cream,
+    paddingBottom: Platform.OS === 'ios' ? 28 * S : 8 * S,
+  },
+  barContainer: {
+    marginHorizontal: 24 * S,
+    backgroundColor: SparkColors.warmCanvas,
+    borderRadius: 36 * S,
+    borderWidth: 1,
+    borderColor: SparkColors.warmBorder,
+  },
+  barInner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 8 * S,
     paddingVertical: 8 * S,
+  },
+  tabActive: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  tabInactive: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 4 * S,
   },
 });
 
 export default function TabLayout() {
   return (
     <Tabs
-      screenOptions={{
-        headerShown: false,
-        tabBarShowLabel: false,
-        tabBarStyle: {
-          backgroundColor: SparkColors.cream,
-          borderTopWidth: 0,
-          elevation: 0,
-          height: Platform.OS === 'ios' ? 88 * S : 64 * S,
-          paddingTop: 8 * S,
-          paddingBottom: Platform.OS === 'ios' ? 28 * S : 8 * S,
-          shadowColor: '#000',
-          shadowOffset: { width: 0, height: -2 },
-          shadowOpacity: 0.04,
-          shadowRadius: 8,
-        },
-      }}
+      tabBar={(props) => <CustomTabBar {...props} />}
+      screenOptions={{ headerShown: false }}
     >
-      <Tabs.Screen
-        name="index"
-        options={{
-          tabBarIcon: ({ focused }) => (
-            <TabIcon focused={focused} iconName={focused ? 'cloud' : 'cloud-outline'} label="Home" />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="history"
-        options={{
-          tabBarIcon: ({ focused }) => (
-            <TabIcon focused={focused} iconName={focused ? 'time' : 'time-outline'} label="History" />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="script"
-        options={{
-          tabBarIcon: ({ focused }) => (
-            <TabIcon focused={focused} iconName={focused ? 'document-text' : 'document-text-outline'} label="Script" />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="profile"
-        options={{
-          tabBarIcon: ({ focused }) => (
-            <TabIcon focused={focused} iconName={focused ? 'person' : 'person-outline'} label="Profile" />
-          ),
-        }}
-      />
+      <Tabs.Screen name="index" />
+      <Tabs.Screen name="history" />
+      <Tabs.Screen name="script" />
+      <Tabs.Screen name="profile" />
     </Tabs>
   );
 }
