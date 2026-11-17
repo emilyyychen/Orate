@@ -13,40 +13,33 @@ const S = SW / 390;
 /* ───── background pattern data ───── */
 type Shape = { type: 'square' | 'circle'; x: number; y: number };
 const PATTERN_SHAPES: Shape[] = [
-  // Row 0 (y=0)
   { type: 'square', x: -3, y: 0 }, { type: 'circle', x: 61, y: 0 },
   { type: 'square', x: 125, y: 0 }, { type: 'square', x: 253, y: 0 },
   { type: 'square', x: 317, y: 0 }, { type: 'circle', x: 381, y: 0 },
-  // Row 1 (y=64)
   { type: 'circle', x: -3, y: 64 }, { type: 'square', x: 61, y: 64 },
   { type: 'square', x: 189, y: 64 }, { type: 'circle', x: 253, y: 64 },
   { type: 'circle', x: 317, y: 64 }, { type: 'square', x: 381, y: 64 },
-  // Row 2 (y=128)
   { type: 'square', x: -3, y: 128 }, { type: 'square', x: 125, y: 128 },
   { type: 'circle', x: 189, y: 128 }, { type: 'square', x: 253, y: 128 },
   { type: 'square', x: 317, y: 128 },
-  // Row 3 (y=192)
   { type: 'square', x: 61, y: 192 }, { type: 'circle', x: 125, y: 192 },
   { type: 'square', x: 189, y: 192 }, { type: 'square', x: 381, y: 192 },
-  // Row 4 (y=256)
   { type: 'square', x: -3, y: 256 }, { type: 'circle', x: 61, y: 256 },
   { type: 'square', x: 125, y: 256 }, { type: 'square', x: 253, y: 256 },
   { type: 'square', x: 317, y: 256 }, { type: 'circle', x: 381, y: 256 },
-  // Row 5 (y=320)
   { type: 'square', x: -3, y: 320 }, { type: 'circle', x: 61, y: 320 },
   { type: 'square', x: 125, y: 320 }, { type: 'square', x: 253, y: 320 },
   { type: 'square', x: 317, y: 320 }, { type: 'circle', x: 381, y: 320 },
 ];
 const SHAPE_SIZE = 56;
-const PATTERN_H = 384; // pattern area height
-const YELLOW_COLOR = '#FDE068';
-const CORAL_COLOR = '#F0A090';
+const PATTERN_H = 384;
+const YELLOW_SQ = '#FDE068';
+const CORAL_CIR = '#F0A090';
 
 function BackgroundPattern() {
   return (
     <View style={patStyles.wrap} pointerEvents="none">
       {PATTERN_SHAPES.map((s, i) => {
-        // fade out toward bottom of pattern
         const rowOpacity = Math.max(0.03, 0.14 - (s.y / PATTERN_H) * 0.14);
         const size = SHAPE_SIZE * S;
         return (
@@ -59,7 +52,7 @@ function BackgroundPattern() {
               width: size,
               height: size,
               borderRadius: s.type === 'circle' ? size / 2 : 12 * S,
-              backgroundColor: s.type === 'square' ? YELLOW_COLOR : CORAL_COLOR,
+              backgroundColor: s.type === 'square' ? YELLOW_SQ : CORAL_CIR,
               opacity: rowOpacity,
             }}
           />
@@ -97,6 +90,12 @@ const TIMES = [
   { id: 'custom', label: 'Customize...', icon: 'time-outline' as const },
 ];
 
+/* ───── Figma-exact colors ───── */
+const CHOICE_DEFAULT_BG = '#FFE9BB';
+const CHOICE_DEFAULT_BORDER = '#E7DED2';
+const CHOICE_SELECTED_BG = '#FFF1C1';
+const CHOICE_SELECTED_BORDER = '#FF9900';
+
 /* ───── bottom sheet constants ───── */
 const SHEET_TOP = SH * 0.166; // Figma: y=140/844
 const SHEET_RADIUS = 32 * S;
@@ -104,7 +103,7 @@ const SHEET_RADIUS = 32 * S;
 /* ═══════════════════════════════════════════ */
 export default function HomeScreen() {
   const [showSheet, setShowSheet] = useState(false);
-  const [step, setStep] = useState(1); // 1-3
+  const [step, setStep] = useState(1);
   const [sessionName, setSessionName] = useState('');
   const [occasion, setOccasion] = useState('');
   const [material, setMaterial] = useState('');
@@ -112,13 +111,11 @@ export default function HomeScreen() {
 
   const slideAnim = useRef(new Animated.Value(SH)).current;
 
-  /* open sheet */
   const openSheet = () => {
     setStep(1);
     setShowSheet(true);
     Animated.spring(slideAnim, { toValue: 0, useNativeDriver: true, tension: 65, friction: 11 }).start();
   };
-  /* close sheet */
   const closeSheet = () => {
     Animated.timing(slideAnim, { toValue: SH, duration: 250, useNativeDriver: true }).start(() => {
       setShowSheet(false);
@@ -129,53 +126,54 @@ export default function HomeScreen() {
       setTimeChoice('');
     });
   };
-  /* next / back */
   const next = () => { if (step < 3) setStep(step + 1); };
   const back = () => { if (step > 1) setStep(step - 1); else closeSheet(); };
 
-  /* ── render ── */
   return (
     <View style={styles.root}>
-      {/* cream background + pattern */}
       <BackgroundPattern />
 
       <SafeAreaView style={styles.safe} edges={['top']}>
-        {/* ─── Home content ─── */}
         <View style={styles.homeContent}>
-          {/* Top-left logo */}
-          <Image source={require('@/assets/images/orate-logo.png')} style={styles.logo} resizeMode="contain" />
-
-          {/* Character + text */}
-          <View style={styles.hero}>
-            <Image source={require('@/assets/images/orate-character.png')} style={styles.character} resizeMode="contain" />
-            <Text style={styles.heroTitle}>Let's record your{'\n'}first session</Text>
-            <Text style={styles.heroSub}>Practice makes perfect — start with{'\n'}a quick recording to warm up.</Text>
+          {/* ─── Logo row: icon + "Orate" ─── */}
+          <View style={styles.logoRow}>
+            <Image source={require('@/assets/images/orate-logo.png')} style={styles.logoIcon} resizeMode="contain" />
+            <Text style={styles.logoText}>Orate</Text>
           </View>
 
-          {/* CTA */}
+          {/* ─── Character + text + CTA block (centered) ─── */}
+          <View style={styles.hero}>
+            <Image source={require('@/assets/images/orate-character.png')} style={styles.character} resizeMode="contain" />
+            <View style={styles.titleBlock}>
+              <Text style={styles.heroTitle}>Let's record your{'\n'}first section</Text>
+              <Text style={styles.heroSub}>Set up a session, then press record.</Text>
+            </View>
+          </View>
+
+          {/* CTA — in flow, 45px below title block */}
           <TouchableOpacity style={styles.ctaBtn} activeOpacity={0.85} onPress={openSheet}>
             <Text style={styles.ctaText}>Start my first recording</Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
 
-      {/* ═══ Bottom Sheet (modal) ═══ */}
+      {/* ═══ Bottom Sheet ═══ */}
       <Modal visible={showSheet} transparent animationType="none" statusBarTranslucent>
         <View style={styles.overlay}>
           <Animated.View style={[styles.sheet, { transform: [{ translateY: slideAnim }] }]}>
             <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }}>
-              {/* ── sheet header ── */}
+              {/* sheet header */}
               <View style={styles.sheetHeader}>
                 {step > 1 ? (
                   <TouchableOpacity onPress={back} hitSlop={12} style={styles.headerBtn}>
-                    <Ionicons name="arrow-back" size={22 * S} color={SparkColors.cocoaText} />
+                    <Ionicons name="arrow-back" size={24 * S} color={SparkColors.cocoaText} />
                   </TouchableOpacity>
                 ) : (
                   <View style={styles.headerBtn} />
                 )}
                 <View style={{ flex: 1 }} />
                 <TouchableOpacity onPress={closeSheet} hitSlop={12} style={styles.headerBtn}>
-                  <Ionicons name="close" size={22 * S} color={SparkColors.cocoaText} />
+                  <Ionicons name="close" size={24 * S} color={SparkColors.cocoaText} />
                 </TouchableOpacity>
               </View>
 
@@ -193,18 +191,16 @@ export default function HomeScreen() {
                   <>
                     <Text style={styles.sheetTitle}>Set up your recording</Text>
 
-                    {/* session name */}
-                    <Text style={styles.fieldLabel}>Recording name</Text>
+                    <Text style={styles.fieldLabel}>Session name · optional</Text>
                     <TextInput
                       style={styles.input}
-                      placeholder="e.g. Capstone presentation"
+                      placeholder="Series B pitch"
                       placeholderTextColor={SparkColors.paleGray}
                       value={sessionName}
                       onChangeText={setSessionName}
                     />
 
-                    {/* occasion */}
-                    <Text style={styles.fieldLabel}>What's the occasion?</Text>
+                    <Text style={styles.fieldLabel}>What are you preparing for?</Text>
                     {OCCASIONS.map((o) => (
                       <TouchableOpacity
                         key={o.id}
@@ -212,9 +208,9 @@ export default function HomeScreen() {
                         activeOpacity={0.7}
                         onPress={() => setOccasion(o.id)}
                       >
-                        <Ionicons name={o.icon} size={20 * S} color={SparkColors.brandOrange} />
+                        <Ionicons name={o.icon} size={20 * S} color={SparkColors.brandOrange} style={styles.optionIcon} />
                         <Text style={styles.optionText}>{o.label}</Text>
-                        <View style={styles.radioOuter}>
+                        <View style={[styles.radioOuter, occasion === o.id && styles.radioOuterActive]}>
                           {occasion === o.id && <View style={styles.radioInner} />}
                         </View>
                       </TouchableOpacity>
@@ -243,9 +239,7 @@ export default function HomeScreen() {
                       </TouchableOpacity>
                     ))}
 
-                    <Text style={styles.helperText}>
-                      You can always add or change this later.
-                    </Text>
+                    <Text style={styles.helperText}>You can always add or change this later.</Text>
                   </>
                 )}
 
@@ -262,9 +256,9 @@ export default function HomeScreen() {
                         activeOpacity={0.7}
                         onPress={() => setTimeChoice(t.id)}
                       >
-                        <Ionicons name={t.icon} size={20 * S} color={SparkColors.brandOrange} />
+                        <Ionicons name={t.icon} size={20 * S} color={SparkColors.brandOrange} style={styles.optionIcon} />
                         <Text style={styles.optionText}>{t.label}</Text>
-                        <View style={styles.radioOuter}>
+                        <View style={[styles.radioOuter, timeChoice === t.id && styles.radioOuterActive]}>
                           {timeChoice === t.id && <View style={styles.radioInner} />}
                         </View>
                       </TouchableOpacity>
@@ -273,7 +267,7 @@ export default function HomeScreen() {
                 )}
               </ScrollView>
 
-              {/* ── bottom button ── */}
+              {/* bottom button */}
               <View style={styles.sheetFooter}>
                 <TouchableOpacity
                   style={styles.darkBtn}
@@ -295,10 +289,7 @@ export default function HomeScreen() {
 
 /* ═══════════ styles ═══════════ */
 const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: SparkColors.cream,
-  },
+  root: { flex: 1, backgroundColor: SparkColors.cream },
   safe: { flex: 1 },
 
   /* ── home ── */
@@ -306,55 +297,76 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 24 * S,
   },
-  logo: {
-    width: 80 * S,
-    height: 28 * S,
-    marginTop: 12 * S,
+
+  /* logo */
+  logoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 9 * S,
   },
+  logoIcon: {
+    width: 38 * S,
+    height: 38 * S,
+  },
+  logoText: {
+    fontFamily: SparkFonts.outfitBold,
+    fontSize: 24 * S,
+    color: SparkColors.brandOrange,
+    marginLeft: 6 * S,
+  },
+
+  /* hero block */
   hero: {
     alignItems: 'center',
-    marginTop: 60 * S,
+    marginTop: 150 * S,
   },
   character: {
-    width: 180 * S,
-    height: 180 * S,
-    marginBottom: 24 * S,
+    width: 77 * S,
+    height: 73 * S,
+    marginBottom: 15 * S,
+  },
+  titleBlock: {
+    width: 294 * S,
+    alignItems: 'center',
   },
   heroTitle: {
     fontFamily: SparkFonts.outfitBold,
-    fontSize: 26 * S,
+    fontSize: 28 * S,
     lineHeight: 34 * S,
-    color: SparkColors.cocoaText,
+    color: SparkColors.cocoaCta,
     textAlign: 'center',
-    marginBottom: 10 * S,
+    marginBottom: 14 * S,
   },
   heroSub: {
     fontFamily: SparkFonts.robotoRegular,
     fontSize: 15 * S,
-    lineHeight: 22 * S,
-    color: SparkColors.warmGray,
+    lineHeight: 21 * S,
+    color: SparkColors.cocoaCta,
     textAlign: 'center',
   },
+
+  /* CTA */
   ctaBtn: {
     backgroundColor: SparkColors.cocoaCta,
-    borderRadius: 28 * S,
-    height: 56 * S,
+    borderRadius: 23 * S,
+    height: 52 * S,
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 'auto' as any,
-    marginBottom: 24 * S,
+    marginTop: 45 * S,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.17,
+    shadowRadius: 3.5,
+    elevation: 3,
   },
   ctaText: {
-    fontFamily: SparkFonts.robotoMedium,
+    fontFamily: SparkFonts.robotoBold,
     fontSize: 16 * S,
-    color: '#FFFFFF',
+    color: '#FFFCF5',
   },
 
   /* ── sheet ── */
-  overlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.25)',
-  },
+  overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.25)' },
   sheet: {
     position: 'absolute',
     top: SHEET_TOP,
@@ -369,19 +381,17 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 20 * S,
-    paddingTop: 20 * S,
-    paddingBottom: 8 * S,
+    paddingHorizontal: 12 * S,
+    paddingTop: 12 * S,
+    paddingBottom: 0,
   },
   headerBtn: {
-    width: 36 * S,
-    height: 36 * S,
+    width: 44 * S,
+    height: 44 * S,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  sheetScroll: {
-    flex: 1,
-  },
+  sheetScroll: { flex: 1 },
   sheetScrollContent: {
     paddingHorizontal: 24 * S,
     paddingBottom: 24 * S,
@@ -392,11 +402,12 @@ const styles = StyleSheet.create({
     fontFamily: SparkFonts.robotoMedium,
     fontSize: 13 * S,
     color: SparkColors.warmGray,
-    marginBottom: 8 * S,
+    marginBottom: 7 * S,
   },
   sheetTitle: {
     fontFamily: SparkFonts.outfitBold,
-    fontSize: 24 * S,
+    fontSize: 28 * S,
+    lineHeight: 36 * S,
     color: SparkColors.cocoaText,
     marginBottom: 20 * S,
   },
@@ -414,14 +425,14 @@ const styles = StyleSheet.create({
     fontFamily: SparkFonts.robotoMedium,
     fontSize: 14 * S,
     color: SparkColors.cocoaText,
-    marginBottom: 8 * S,
+    marginBottom: 6 * S,
   },
   input: {
-    backgroundColor: SparkColors.warmCanvas,
+    backgroundColor: '#FFFFFF',
     borderRadius: 16 * S,
     borderWidth: 1,
     borderColor: SparkColors.warmBorder,
-    height: 50 * S,
+    height: 48 * S,
     paddingHorizontal: 16 * S,
     fontFamily: SparkFonts.robotoRegular,
     fontSize: 15 * S,
@@ -429,43 +440,51 @@ const styles = StyleSheet.create({
     marginBottom: 20 * S,
   },
 
-  /* option rows (occasion & time) */
+  /* option rows */
   optionRow: {
     flexDirection: 'row',
     alignItems: 'center',
     height: 49 * S,
-    borderRadius: 25 * S,
+    borderRadius: 23 * S,
     borderWidth: 1,
-    borderColor: SparkColors.warmBorder,
-    backgroundColor: SparkColors.warmCanvas,
-    paddingHorizontal: 18 * S,
-    marginBottom: 10 * S,
+    borderColor: CHOICE_DEFAULT_BORDER,
+    backgroundColor: CHOICE_DEFAULT_BG,
+    paddingLeft: 17 * S,
+    paddingRight: 14 * S,
+    marginBottom: 8 * S,
   },
   optionRowActive: {
-    borderColor: SparkColors.brandOrange,
-    backgroundColor: '#FFF8EC',
+    borderColor: CHOICE_SELECTED_BORDER,
+    borderWidth: 1.5,
+    backgroundColor: CHOICE_SELECTED_BG,
+  },
+  optionIcon: {
+    width: 20 * S,
   },
   optionText: {
     flex: 1,
-    fontFamily: SparkFonts.robotoRegular,
-    fontSize: 15 * S,
+    fontFamily: SparkFonts.robotoMedium,
+    fontSize: 16 * S,
     color: SparkColors.cocoaText,
-    marginLeft: 14 * S,
+    marginLeft: 15 * S,
   },
   radioOuter: {
     width: 20 * S,
     height: 20 * S,
     borderRadius: 10 * S,
     borderWidth: 1.5,
-    borderColor: SparkColors.warmBorder,
+    borderColor: CHOICE_DEFAULT_BORDER,
     alignItems: 'center',
     justifyContent: 'center',
   },
+  radioOuterActive: {
+    borderColor: CHOICE_SELECTED_BORDER,
+  },
   radioInner: {
-    width: 12 * S,
-    height: 12 * S,
-    borderRadius: 6 * S,
-    backgroundColor: SparkColors.brandOrange,
+    width: 8 * S,
+    height: 8 * S,
+    borderRadius: 4 * S,
+    backgroundColor: '#FFFFFF',
   },
 
   /* material cards */
@@ -475,15 +494,16 @@ const styles = StyleSheet.create({
     height: 72 * S,
     borderRadius: 20 * S,
     borderWidth: 1,
-    borderColor: SparkColors.warmBorder,
-    backgroundColor: SparkColors.warmCanvas,
+    borderColor: CHOICE_DEFAULT_BORDER,
+    backgroundColor: CHOICE_DEFAULT_BG,
     paddingHorizontal: 18 * S,
     paddingVertical: 14 * S,
     marginBottom: 12 * S,
   },
   materialCardActive: {
-    borderColor: SparkColors.brandOrange,
-    backgroundColor: '#FFF8EC',
+    borderColor: CHOICE_SELECTED_BORDER,
+    borderWidth: 1.5,
+    backgroundColor: CHOICE_SELECTED_BG,
   },
   materialTextWrap: {
     flex: 1,
@@ -516,14 +536,14 @@ const styles = StyleSheet.create({
   },
   darkBtn: {
     backgroundColor: SparkColors.cocoaCta,
-    borderRadius: 28 * S,
+    borderRadius: 23 * S,
     height: 52 * S,
     alignItems: 'center',
     justifyContent: 'center',
   },
   darkBtnText: {
-    fontFamily: SparkFonts.robotoMedium,
+    fontFamily: SparkFonts.robotoBold,
     fontSize: 16 * S,
-    color: '#FFFFFF',
+    color: '#FFFCF5',
   },
 });

@@ -7,13 +7,16 @@ import { SparkColors, SparkFonts } from '@/constants/Spark';
 const { width: SW } = Dimensions.get('window');
 const S = SW / 390;
 
+/* Figma: active pill is #FFC501 (yellow), NOT brandOrange */
+const TAB_ACTIVE_PILL = '#FFC501';
+
 type TabIconProps = { focused: boolean; iconName: keyof typeof Ionicons.glyphMap; label: string };
 
 function TabIcon({ focused, iconName, label }: TabIconProps) {
   if (focused) {
     return (
       <View style={tabStyles.activePill}>
-        <Ionicons name={iconName} size={22 * S} color={SparkColors.cocoaText} />
+        <Ionicons name={iconName} size={22 * S} color="#000000" />
         <Text style={tabStyles.activeLabel}>{label}</Text>
       </View>
     );
@@ -69,21 +72,21 @@ const tabStyles = StyleSheet.create({
   activePill: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: SparkColors.brandOrange,
-    borderRadius: 24 * S,
+    backgroundColor: TAB_ACTIVE_PILL,
+    borderRadius: 26 * S,
     paddingHorizontal: 16 * S,
-    paddingVertical: 10 * S,
+    paddingVertical: 12 * S,
     gap: 8 * S,
   },
   activeLabel: {
-    fontFamily: SparkFonts.robotoMedium,
-    fontSize: 14 * S,
-    color: SparkColors.cocoaText,
+    fontFamily: SparkFonts.robotoBold,
+    fontSize: 16 * S,
+    color: '#000000',
   },
   inactiveWrap: {
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 10 * S,
+    paddingVertical: 12 * S,
   },
   barOuter: {
     backgroundColor: SparkColors.cream,
@@ -91,10 +94,16 @@ const tabStyles = StyleSheet.create({
   },
   barContainer: {
     marginHorizontal: 24 * S,
-    backgroundColor: SparkColors.warmCanvas,
+    backgroundColor: '#FFFFFF',
     borderRadius: 36 * S,
     borderWidth: 1,
-    borderColor: SparkColors.warmBorder,
+    borderColor: 'rgba(255,255,255,0.8)',
+    /* Figma shadow: 0px 6px 10px rgba(33,26,20,0.12) */
+    shadowColor: 'rgb(33,26,20)',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.12,
+    shadowRadius: 10,
+    elevation: 6,
   },
   barInner: {
     flexDirection: 'row',
