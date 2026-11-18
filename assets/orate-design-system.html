@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Orate Design System — Complete Reference</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@700&family=Roboto:wght@400;500;700&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Roboto', sans-serif; background: #FFFCF3; color: #1C1C1E; padding: 40px 24px; max-width: 1200px; margin: 0 auto; }
+
+  h1 { font-family: 'Outfit', sans-serif; font-size: 36px; font-weight: 700; margin-bottom: 8px; }
+  h2 { font-family: 'Outfit', sans-serif; font-size: 28px; font-weight: 700; margin: 48px 0 24px; padding-bottom: 12px; border-bottom: 2px solid #EBDFC0; }
+  h3 { font-family: 'Outfit', sans-serif; font-size: 20px; font-weight: 700; margin: 32px 0 16px; color: #706659; text-transform: uppercase; letter-spacing: 1px; font-size: 13px; }
+
+  .subtitle { color: #706659; font-size: 16px; margin-bottom: 40px; }
+  .section-num { color: #FF9900; font-family: 'Outfit', sans-serif; font-weight: 700; margin-right: 8px; }
+
+  /* Color Palette */
+  .color-group { margin-bottom: 32px; }
+  .color-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 16px; }
+  .color-card { border-radius: 12px; overflow: hidden; border: 1px solid #EBDFC0; background: #fff; }
+  .color-swatch { height: 80px; }
+  .color-info { padding: 12px; }
+  .color-name { font-weight: 700; font-size: 14px; margin-bottom: 4px; }
+  .color-hex { font-family: monospace; font-size: 13px; color: #706659; }
+  .color-usage { font-size: 12px; color: #8E8E93; margin-top: 4px; }
+
+  /* Typography */
+  .type-row { display: flex; align-items: baseline; padding: 16px 0; border-bottom: 1px solid #EBDFC0; gap: 24px; }
+  .type-label { width: 100px; flex-shrink: 0; font-size: 11px; font-weight: 500; color: #8A7B66; text-transform: uppercase; letter-spacing: 0.5px; }
+  .type-sample { flex: 1; }
+  .type-spec { width: 300px; flex-shrink: 0; text-align: right; font-size: 13px; color: #706659; }
+
+  /* Components */
+  .component-section { margin-bottom: 24px; }
+  .component-specs { background: #fff; border: 1px solid #EBDFC0; border-radius: 16px; padding: 24px; margin-bottom: 16px; }
+  .spec-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f0e8d8; }
+  .spec-row:last-child { border-bottom: none; }
+  .spec-label { font-weight: 500; color: #1C1C1E; }
+  .spec-value { font-family: monospace; color: #706659; }
+
+  /* Buttons preview */
+  .button-grid { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 16px; }
+  .btn-preview { padding: 14px 48px; border-radius: 26px; font-family: 'Roboto', sans-serif; font-weight: 700; font-size: 16px; line-height: 22px; border: none; cursor: pointer; min-width: 160px; text-align: center; }
+  .btn-continue { background: #3A2925; color: #fff; }
+  .btn-view-path { background: #FEE47B; color: #3A2925; }
+  .btn-cancel { background: #fff; color: #3A2925; border: 1px solid #EBDFC0; }
+  .btn-delete { background: #FF4D36; color: #fff; }
+
+  /* Chips preview */
+  .chip-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .chip { padding: 6px 16px; border-radius: 18px; font-size: 14px; font-weight: 500; }
+  .chip-active { background: #FF9900; color: #fff; }
+  .chip-next { background: #FEE47B; color: #3A2925; }
+  .chip-inactive { background: #fff; color: #3A2925; border: 1px solid #EBDFC0; }
+  .chip-pro { background: #FF4D36; color: #fff; font-size: 11px; font-weight: 700; padding: 4px 10px; }
+
+  /* Asset grids */
+  .asset-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+  .asset-card { background: #fff; border: 1px solid #EBDFC0; border-radius: 16px; padding: 16px; }
+  .asset-card img { width: 100%; height: auto; border-radius: 8px; }
+  .asset-name { font-weight: 500; font-size: 13px; margin-top: 8px; color: #706659; font-family: monospace; }
+
+  .icon-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 12px; }
+  .icon-card { background: #fff; border: 1px solid #EBDFC0; border-radius: 12px; padding: 12px; text-align: center; }
+  .icon-card img { width: 48px; height: 48px; object-fit: contain; }
+  .icon-name { font-size: 10px; color: #8E8E93; margin-top: 6px; word-break: break-all; }
+
+  .char-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; }
+
+  .badge { display: inline-block; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 700; margin-left: 8px; }
+  .badge-svg { background: #FFF4CC; color: #FF9900; }
+  .badge-png { background: #FFE8BE; color: #79513C; }
+
+  .format-note { background: #FFF4CC; border: 1px solid #EBDFC0; border-radius: 12px; padding: 16px; margin: 16px 0; font-size: 14px; color: #706659; }
+  .format-note strong { color: #1C1C1E; }
+</style>
+</head>
+<body>
+
+<h1>Orate Design System</h1>
+<p class="subtitle">Visual foundation &middot; one product, one language &middot; Extracted from Figma</p>
+
+<div class="format-note">
+  <strong>Asset Formats:</strong> All assets are available in both <span class="badge badge-svg">SVG</span> (vector, in <code>assets/svg/</code>) and <span class="badge badge-png">PNG</span> (raster @2x, in <code>assets/png/</code>)
+</div>
+
+<!-- 01 COLOUR -->
+<h2><span class="section-num">01</span> Colour</h2>
+
+<h3>Surface</h3>
+<div class="color-grid">
+  <div class="color-card"><div class="color-swatch" style="background:#FFFCF3"></div><div class="color-info"><div class="color-name">Background</div><div class="color-hex">#FFFCF3</div><div class="color-usage">App canvas</div></div></div>
+  <div class="color-card"><div class="color-swatch" style="background:#FFFFFF"></div><div class="color-info"><div class="color-name">Container</div><div class="color-hex">#FFFFFF</div><div class="color-usage">Cards, lists, tiles</div></div></div>
+  <div class="color-card"><div class="color-swatch" style="background:#EBDFC0"></div><div class="color-info"><div class="color-name">Border</div><div class="color-hex">#EBDFC0</div><div class="color-usage">Hairline on containers</div></div></div>
+  <div class="color-card"><div class="color-swatch" style="background:#FFEDE6"></div><div class="color-info"><div class="color-name">Destructive bg</div><div class="color-hex">#FFEDE6</div><div class="color-usage">Delete / warn tiles</div></div></div>
+</div>
+
+<h3>Brand</h3>
+<div class="color-grid">
+  <div class="color-card"><div class="color-swatch" style="background:#FF9900"></div><div class="color-info"><div class="color-name">Orange</div><div class="color-hex">#FF9900</div><div class="color-usage">Character / logo</div></div></div>
+  <div class="color-card"><div class="color-swatch" style="background:#FEE47B"></div><div class="color-info"><div class="color-name">Yellow 500</div><div class="color-hex">#FEE47B</div><div class="color-usage">Hero surfaces</div></div></div>
+  <div class="color-card"><div class="color-swatch" style="background:#FFC501"></div><div class="color-info"><div class="color-name">Yellow 600</div><div class="color-hex">#FFC501</div><div class="color-usage">Active tab pill</div></div></div>
+  <div class="color-card"><div class="color-swatch" style="background:#FFF4CC"></div><div class="color-info"><div class="color-name">Yellow 100</div><div class="color-hex">#FFF4CC</div><div class="color-usage">Chip / soft accent</div></div></div>
+  <div class="color-card"><div class="color-swatch" style="background:#FF4D36"></div><div class="color-info"><div class="color-name">Coral</div><div class="color-hex">#FF4D36</div><div class="color-usage">Accent / destructive</div></div></div>
+</div>
+
+<h3>Text</h3>
+<div class="color-grid">
+  <div class="color-card"><div class="color-swatch" style="background:#1C1C1E"></div><div class="color-info"><div class="color-name">Primary</div><div class="color-hex">#1C1C1E</div><div class="color-usage">Headlines / body</div></div></div>
+  <div class="color-card"><div class="color-swatch" style="background:#706659"></div><div class="color-info"><div class="color-name">Secondary</div><div class="color-hex">#706659</div><div class="color-usage">Supporting copy</div></div></div>
+  <div class="color-card"><div class="color-swatch" style="background:#8E8E93"></div><div class="color-info"><div class="color-name">Tertiary</div><div class="color-hex">#8E8E93</div><div class="color-usage">Meta / timestamps</div></div></div>
+  <div class="color-card"><div class="color-swatch" style="background:#8A7B66"></div><div class="color-info"><div class="color-name">Label</div><div class="color-hex">#8A7B66</div><div class="color-usage">Uppercase labels</div></div></div>
+  <div class="color-card"><div class="color-swatch" style="background:#FFFCF5; border: 1px solid #EBDFC0"></div><div class="color-info"><div class="color-name">Inverse</div><div class="color-hex">#FFFCF5</div><div class="color-usage">On dark / on coral</div></div></div>
+</div>
+
+<h3>Interactive</h3>
+<div class="color-grid">
+  <div class="color-card"><div class="color-swatch" style="background:#3A2925"></div><div class="color-info"><div class="color-name">Button</div><div class="color-hex">#3A2925</div><div class="color-usage">Primary action pill</div></div></div>
+  <div class="color-card"><div class="color-swatch" style="background:#B8A98F"></div><div class="color-info"><div class="color-name">Chevron</div><div class="color-hex">#B8A98F</div><div class="color-usage">Row affordance</div></div></div>
+  <div class="color-card"><div class="color-swatch" style="background:#EB352B"></div><div class="color-info"><div class="color-name">Marker</div><div class="color-hex">#EB352B</div><div class="color-usage">Red dot / WIP only</div></div></div>
+</div>
+
+<!-- 02 TYPOGRAPHY -->
+<h2><span class="section-num">02</span> Typography</h2>
+
+<div class="type-row">
+  <div class="type-label">H1</div>
+  <div class="type-sample" style="font-family:'Outfit',sans-serif;font-weight:700;font-size:28px;line-height:34px">H1 &middot; Page title</div>
+  <div class="type-spec">Outfit Bold &middot; 28/34 &middot; sentence case</div>
+</div>
+<div class="type-row">
+  <div class="type-label">H2</div>
+  <div class="type-sample" style="font-family:'Outfit',sans-serif;font-weight:700;font-size:22px;line-height:28px">H2 &middot; In-card hero</div>
+  <div class="type-spec">Outfit Bold &middot; 22/28 &middot; card / session heading</div>
+</div>
+<div class="type-row">
+  <div class="type-label">H3</div>
+  <div class="type-sample" style="font-family:'Outfit',sans-serif;font-weight:700;font-size:20px;line-height:24px">H3 &middot; Section header</div>
+  <div class="type-spec">Outfit Bold &middot; 20/24 &middot; -1%</div>
+</div>
+<div class="type-row">
+  <div class="type-label">H4</div>
+  <div class="type-sample" style="font-family:'Outfit',sans-serif;font-weight:700;font-size:18px;line-height:24px">H4 &middot; Component title</div>
+  <div class="type-spec">Outfit Bold &middot; 18/24 &middot; AI observation</div>
+</div>
+<div class="type-row">
+  <div class="type-label">Body 1</div>
+  <div class="type-sample" style="font-family:'Roboto',sans-serif;font-weight:400;font-size:16px;line-height:22px">Body 1 — primary reading text sits here with comfortable rhythm.</div>
+  <div class="type-spec">Roboto Regular &middot; 16/22 &middot; primary copy</div>
+</div>
+<div class="type-row">
+  <div class="type-label">Body 2</div>
+  <div class="type-sample" style="font-family:'Roboto',sans-serif;font-weight:400;font-size:15px;line-height:21px">Body 2 — supporting copy, meta, descriptions.</div>
+  <div class="type-spec">Roboto Regular &middot; 15/21 &middot; supporting copy</div>
+</div>
+<div class="type-row">
+  <div class="type-label">Label</div>
+  <div class="type-sample" style="font-family:'Roboto',sans-serif;font-weight:500;font-size:12px;line-height:16px;text-transform:uppercase;letter-spacing:0">Section label</div>
+  <div class="type-spec">Roboto Medium &middot; 12/16 &middot; sentence case &middot; no tracking</div>
+</div>
+<div class="type-row">
+  <div class="type-label">Nav Text</div>
+  <div class="type-sample" style="font-family:'Outfit',sans-serif;font-weight:700;font-size:17px;line-height:22px">Nav title</div>
+  <div class="type-spec">Outfit Bold &middot; 17/22 &middot; centered in nav bar</div>
+</div>
+<div class="type-row">
+  <div class="type-label">Button</div>
+  <div class="type-sample" style="font-family:'Roboto',sans-serif;font-weight:700;font-size:16px;line-height:22px">Button label</div>
+  <div class="type-spec">Roboto Bold &middot; 16/22</div>
+</div>
+<div class="type-row">
+  <div class="type-label">Numeral XL</div>
+  <div class="type-sample" style="font-family:'Outfit',sans-serif;font-weight:700;font-size:75px;line-height:90px">90</div>
+  <div class="type-spec">Outfit Bold &middot; 75/90 &middot; clarity score</div>
+</div>
+
+<!-- 03 COMPONENTS -->
+<h2><span class="section-num">03</span> Components</h2>
+
+<h3>Buttons &middot; 342 &times; 52 &middot; pill radius 26 &middot; label 16/22 bold</h3>
+<div class="button-grid">
+  <button class="btn-preview btn-continue">Continue</button>
+  <button class="btn-preview btn-view-path">View path</button>
+  <button class="btn-preview btn-cancel">Cancel</button>
+  <button class="btn-preview btn-delete">Delete</button>
+</div>
+
+<h3>Chips &middot; pill &middot; 36h / 24h</h3>
+<div class="chip-grid">
+  <span class="chip chip-active">Active</span>
+  <span class="chip chip-next">Try next</span>
+  <span class="chip chip-pro">PRO</span>
+  <span class="chip chip-inactive">Inactive</span>
+</div>
+
+<h3>Container &middot; white &middot; 20r &middot; 1px border</h3>
+<div class="component-specs">
+  <div class="spec-row"><span class="spec-label">Background</span><span class="spec-value">#FFFFFF</span></div>
+  <div class="spec-row"><span class="spec-label">Border</span><span class="spec-value">1px solid #EBDFC0</span></div>
+  <div class="spec-row"><span class="spec-label">Border radius</span><span class="spec-value">20px</span></div>
+  <div class="spec-row"><span class="spec-label">Padding</span><span class="spec-value">16px</span></div>
+</div>
+
+<h3>Row &middot; 72h &middot; 18r &middot; accent bar</h3>
+<div class="component-specs">
+  <div class="spec-row"><span class="spec-label">Height</span><span class="spec-value">72px</span></div>
+  <div class="spec-row"><span class="spec-label">Border radius</span><span class="spec-value">18px</span></div>
+  <div class="spec-row"><span class="spec-label">Accent bar</span><span class="spec-value">Left edge, 4px wide, brand color</span></div>
+</div>
+
+<!-- 04 COMPONENT ASSETS -->
+<h2><span class="section-num">04</span> Component Assets <span class="badge badge-svg">SVG</span> <span class="badge badge-png">PNG</span></h2>
+
+<div class="asset-grid">
+  <div class="asset-card"><img src="assets/svg/components/tab-bar.svg" onerror="this.src='assets/png/components/tab-bar.png'"><div class="asset-name">tab-bar</div></div>
+  <div class="asset-card"><img src="assets/svg/components/card.svg" onerror="this.src='assets/png/components/card.png'"><div class="asset-name">card</div></div>
+  <div class="asset-card"><img src="assets/svg/components/button.svg" onerror="this.src='assets/png/components/button.png'"><div class="asset-name">button</div></div>
+  <div class="asset-card"><img src="assets/svg/components/header.svg" onerror="this.src='assets/png/components/header.png'"><div class="asset-name">header</div></div>
+  <div class="asset-card"><img src="assets/svg/components/bottom-sheet.svg" onerror="this.src='assets/png/components/bottom-sheet.png'"><div class="asset-name">bottom-sheet</div></div>
+  <div class="asset-card"><img src="assets/svg/components/score-card.svg" onerror="this.src='assets/png/components/score-card.png'"><div class="asset-name">score-card</div></div>
+  <div class="asset-card"><img src="assets/svg/components/metric-card.svg" onerror="this.src='assets/png/components/metric-card.png'"><div class="asset-name">metric-card</div></div>
+  <div class="asset-card"><img src="assets/svg/components/selection-row.svg" onerror="this.src='assets/png/components/selection-row.png'"><div class="asset-name">selection-row</div></div>
+  <div class="asset-card"><img src="assets/svg/components/text-field.svg" onerror="this.src='assets/png/components/text-field.png'"><div class="asset-name">text-field</div></div>
+  <div class="asset-card"><img src="assets/svg/components/message.svg" onerror="this.src='assets/png/components/message.png'"><div class="asset-name">message</div></div>
+  <div class="asset-card"><img src="assets/svg/components/moment-popover.svg" onerror="this.src='assets/png/components/moment-popover.png'"><div class="asset-name">moment-popover</div></div>
+  <div class="asset-card"><img src="assets/svg/components/result-tabs.svg" onerror="this.src='assets/png/components/result-tabs.png'"><div class="asset-name">result-tabs</div></div>
+  <div class="asset-card"><img src="assets/svg/components/analysis-status.svg" onerror="this.src='assets/png/components/analysis-status.png'"><div class="asset-name">analysis-status</div></div>
+  <div class="asset-card"><img src="assets/svg/components/comparison-metric.svg" onerror="this.src='assets/png/components/comparison-metric.png'"><div class="asset-name">comparison-metric</div></div>
+  <div class="asset-card"><img src="assets/svg/components/empty-state.svg" onerror="this.src='assets/png/components/empty-state.png'"><div class="asset-name">empty-state</div></div>
+  <div class="asset-card"><img src="assets/svg/components/progress.svg" onerror="this.src='assets/png/components/progress.png'"><div class="asset-name">progress</div></div>
+  <div class="asset-card"><img src="assets/svg/components/brand-motif.svg" onerror="this.src='assets/png/components/brand-motif.png'"><div class="asset-name">brand-motif</div></div>
+  <div class="asset-card"><img src="assets/svg/components/switch.svg" onerror="this.src='assets/png/components/switch.png'"><div class="asset-name">switch</div></div>
+  <div class="asset-card"><img src="assets/svg/components/choice-indicator.svg" onerror="this.src='assets/png/components/choice-indicator.png'"><div class="asset-name">choice-indicator</div></div>
+  <div class="asset-card"><img src="assets/svg/components/issue-marker.svg" onerror="this.src='assets/png/components/issue-marker.png'"><div class="asset-name">issue-marker</div></div>
+</div>
+
+<!-- 05 CHARACTERS -->
+<h2><span class="section-num">05</span> Characters</h2>
+<div class="char-grid">
+  <div class="asset-card"><img src="assets/svg/characters/characters.svg" onerror="this.src='assets/png/characters/characters.png'"><div class="asset-name">characters (all)</div></div>
+  <div class="asset-card"><img src="assets/svg/characters/character-loader.svg" onerror="this.src='assets/png/characters/character-loader.png'"><div class="asset-name">character-loader</div></div>
+  <div class="asset-card"><img src="assets/svg/characters/characters-sub1.svg" onerror="this.src='assets/png/characters/characters-sub1.png'"><div class="asset-name">characters-sub1</div></div>
+  <div class="asset-card"><img src="assets/svg/characters/characters-sub2.svg" onerror="this.src='assets/png/characters/characters-sub2.png'"><div class="asset-name">characters-sub2</div></div>
+  <div class="asset-card"><img src="assets/svg/characters/characters-sub3.svg" onerror="this.src='assets/png/characters/characters-sub3.png'"><div class="asset-name">characters-sub3</div></div>
+  <div class="asset-card"><img src="assets/svg/characters/characters-sub4.svg" onerror="this.src='assets/png/characters/characters-sub4.png'"><div class="asset-name">characters-sub4</div></div>
+  <div class="asset-card"><img src="assets/svg/characters/characters-sub5.svg" onerror="this.src='assets/png/characters/characters-sub5.png'"><div class="asset-name">characters-sub5</div></div>
+  <div class="asset-card"><img src="assets/svg/characters/characters-sub6.svg" onerror="this.src='assets/png/characters/characters-sub6.png'"><div class="asset-name">characters-sub6</div></div>
+</div>
+
+<!-- 06 ICONS -->
+<h2><span class="section-num">06</span> Icons</h2>
+<div class="icon-grid">
+  <div class="icon-card"><img src="assets/svg/icons/tab-bar-sub1.svg" onerror="this.src='assets/png/icons/tab-bar-sub1.png'"><div class="icon-name">tab-bar-sub1</div></div>
+  <div class="icon-card"><img src="assets/svg/icons/tab-bar-sub2.svg" onerror="this.src='assets/png/icons/tab-bar-sub2.png'"><div class="icon-name">tab-bar-sub2</div></div>
+  <div class="icon-card"><img src="assets/svg/icons/tab-bar-sub3.svg" onerror="this.src='assets/png/icons/tab-bar-sub3.png'"><div class="icon-name">tab-bar-sub3</div></div>
+  <div class="icon-card"><img src="assets/svg/icons/tab-bar-sub4.svg" onerror="this.src='assets/png/icons/tab-bar-sub4.png'"><div class="icon-name">tab-bar-sub4</div></div>
+  <div class="icon-card"><img src="assets/svg/icons/tab-bar-sub5.svg" onerror="this.src='assets/png/icons/tab-bar-sub5.png'"><div class="icon-name">tab-bar-sub5</div></div>
+  <div class="icon-card"><img src="assets/svg/icons/tab-bar-sub6.svg" onerror="this.src='assets/png/icons/tab-bar-sub6.png'"><div class="icon-name">tab-bar-sub6</div></div>
+  <div class="icon-card"><img src="assets/svg/icons/tab-bar-sub7.svg" onerror="this.src='assets/png/icons/tab-bar-sub7.png'"><div class="icon-name">tab-bar-sub7</div></div>
+  <div class="icon-card"><img src="assets/svg/icons/tab-bar-sub8.svg" onerror="this.src='assets/png/icons/tab-bar-sub8.png'"><div class="icon-name">tab-bar-sub8</div></div>
+  <div class="icon-card"><img src="assets/svg/icons/header-sub1.svg" onerror="this.src='assets/png/icons/header-sub1.png'"><div class="icon-name">header-sub1</div></div>
+  <div class="icon-card"><img src="assets/svg/icons/header-sub2.svg" onerror="this.src='assets/png/icons/header-sub2.png'"><div class="icon-name">header-sub2</div></div>
+  <div class="icon-card"><img src="assets/svg/icons/card-sub1.svg" onerror="this.src='assets/png/icons/card-sub1.png'"><div class="icon-name">card-sub1</div></div>
+  <div class="icon-card"><img src="assets/svg/icons/card-sub2.svg" onerror="this.src='assets/png/icons/card-sub2.png'"><div class="icon-name">card-sub2</div></div>
+  <div class="icon-card"><img src="assets/svg/icons/card-sub3.svg" onerror="this.src='assets/png/icons/card-sub3.png'"><div class="icon-name">card-sub3</div></div>
+  <div class="icon-card"><img src="assets/svg/icons/card-sub4.svg" onerror="this.src='assets/png/icons/card-sub4.png'"><div class="icon-name">card-sub4</div></div>
+  <div class="icon-card"><img src="assets/svg/icons/card-sub5.svg" onerror="this.src='assets/png/icons/card-sub5.png'"><div class="icon-name">card-sub5</div></div>
+  <div class="icon-card"><img src="assets/svg/icons/card-sub6.svg" onerror="this.src='assets/png/icons/card-sub6.png'"><div class="icon-name">card-sub6</div></div>
+  <div class="icon-card"><img src="assets/svg/icons/card-sub7.svg" onerror="this.src='assets/png/icons/card-sub7.png'"><div class="icon-name">card-sub7</div></div>
+  <div class="icon-card"><img src="assets/svg/icons/score-card-sub1.svg" onerror="this.src='assets/png/icons/score-card-sub1.png'"><div class="icon-name">score-card-sub1</div></div>
+  <div class="icon-card"><img src="assets/svg/icons/score-card-sub2.svg" onerror="this.src='assets/png/icons/score-card-sub2.png'"><div class="icon-name">score-card-sub2</div></div>
+  <div class="icon-card"><img src="assets/svg/icons/score-card-sub3.svg" onerror="this.src='assets/png/icons/score-card-sub3.png'"><div class="icon-name">score-card-sub3</div></div>
+  <div class="icon-card"><img src="assets/svg/icons/score-card-sub4.svg" onerror="this.src='assets/png/icons/score-card-sub4.png'"><div class="icon-name">score-card-sub4</div></div>
+  <div class="icon-card"><img src="assets/svg/icons/score-card-sub5.svg" onerror="this.src='assets/png/icons/score-card-sub5.png'"><div class="icon-name">score-card-sub5</div></div>
+  <div class="icon-card"><img src="assets/svg/icons/score-card-sub6.svg" onerror="this.src='assets/png/icons/score-card-sub6.png'"><div class="icon-name">score-card-sub6</div></div>
+  <div class="icon-card"><img src="assets/svg/icons/score-card-sub7.svg" onerror="this.src='assets/png/icons/score-card-sub7.png'"><div class="icon-name">score-card-sub7</div></div>
+  <div class="icon-card"><img src="assets/svg/icons/score-card-sub8.svg" onerror="this.src='assets/png/icons/score-card-sub8.png'"><div class="icon-name">score-card-sub8</div></div>
+  <div class="icon-card"><img src="assets/svg/icons/score-card-sub9.svg" onerror="this.src='assets/png/icons/score-card-sub9.png'"><div class="icon-name">score-card-sub9</div></div>
+  <div class="icon-card"><img src="assets/svg/icons/analysis-status-sub1.svg" onerror="this.src='assets/png/icons/analysis-status-sub1.png'"><div class="icon-name">analysis-status-sub1</div></div>
+  <div class="icon-card"><img src="assets/svg/icons/analysis-status-sub2.svg" onerror="this.src='assets/png/icons/analysis-status-sub2.png'"><div class="icon-name">analysis-status-sub2</div></div>
+  <div class="icon-card"><img src="assets/svg/icons/analysis-status-sub3.svg" onerror="this.src='assets/png/icons/analysis-status-sub3.png'"><div class="icon-name">analysis-status-sub3</div></div>
+  <div class="icon-card"><img src="assets/svg/icons/bottom-sheet-sub1.svg" onerror="this.src='assets/png/icons/bottom-sheet-sub1.png'"><div class="icon-name">bottom-sheet-sub1</div></div>
+  <div class="icon-card"><img src="assets/svg/icons/choice-indicator-sub1.svg" onerror="this.src='assets/png/icons/choice-indicator-sub1.png'"><div class="icon-name">choice-indicator-sub1</div></div>
+  <div class="icon-card"><img src="assets/svg/icons/choice-indicator-sub2.svg" onerror="this.src='assets/png/icons/choice-indicator-sub2.png'"><div class="icon-name">choice-indicator-sub2</div></div>
+  <div class="icon-card"><img src="assets/svg/icons/choice-indicator-sub3.svg" onerror="this.src='assets/png/icons/choice-indicator-sub3.png'"><div class="icon-name">choice-indicator-sub3</div></div>
+  <div class="icon-card"><img src="assets/svg/icons/empty-state-sub1.svg" onerror="this.src='assets/png/icons/empty-state-sub1.png'"><div class="icon-name">empty-state-sub1</div></div>
+  <div class="icon-card"><img src="assets/svg/icons/issue-marker-sub1.svg" onerror="this.src='assets/png/icons/issue-marker-sub1.png'"><div class="icon-name">issue-marker-sub1</div></div>
+  <div class="icon-card"><img src="assets/svg/icons/issue-marker-sub2.svg" onerror="this.src='assets/png/icons/issue-marker-sub2.png'"><div class="icon-name">issue-marker-sub2</div></div>
+  <div class="icon-card"><img src="assets/svg/icons/issue-marker-sub3.svg" onerror="this.src='assets/png/icons/issue-marker-sub3.png'"><div class="icon-name">issue-marker-sub3</div></div>
+  <div class="icon-card"><img src="assets/svg/icons/issue-marker-sub4.svg" onerror="this.src='assets/png/icons/issue-marker-sub4.png'"><div class="icon-name">issue-marker-sub4</div></div>
+  <div class="icon-card"><img src="assets/svg/icons/issue-marker-sub5.svg" onerror="this.src='assets/png/icons/issue-marker-sub5.png'"><div class="icon-name">issue-marker-sub5</div></div>
+  <div class="icon-card"><img src="assets/svg/icons/issue-marker-sub6.svg" onerror="this.src='assets/png/icons/issue-marker-sub6.png'"><div class="icon-name">issue-marker-sub6</div></div>
+  <div class="icon-card"><img src="assets/svg/icons/metric-card-sub1.svg" onerror="this.src='assets/png/icons/metric-card-sub1.png'"><div class="icon-name">metric-card-sub1</div></div>
+  <div class="icon-card"><img src="assets/svg/icons/selection-row-sub1.svg" onerror="this.src='assets/png/icons/selection-row-sub1.png'"><div class="icon-name">selection-row-sub1</div></div>
+  <div class="icon-card"><img src="assets/svg/icons/selection-row-sub2.svg" onerror="this.src='assets/png/icons/selection-row-sub2.png'"><div class="icon-name">selection-row-sub2</div></div>
+  <div class="icon-card"><img src="assets/svg/icons/switch-sub1.svg" onerror="this.src='assets/png/icons/switch-sub1.png'"><div class="icon-name">switch-sub1</div></div>
+</div>
+
+<div style="margin-top:60px;padding:24px;background:#FFF4CC;border-radius:16px;text-align:center">
+  <p style="font-family:'Outfit',sans-serif;font-weight:700;font-size:20px;color:#3A2925">Orate Design System</p>
+  <p style="color:#706659;margin-top:8px">77 SVGs + 78 PNGs &middot; Colors &middot; Typography &middot; Components</p>
+  <p style="color:#8E8E93;margin-top:4px;font-size:13px">Extracted from Figma &middot; assets/svg/ &amp; assets/png/</p>
+</div>
+
+</body>
+</html>
