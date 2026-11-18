@@ -62,6 +62,12 @@ export default function ResultsReadyScreen() {
           <Animated.View entering={ZoomIn.duration(400).delay(400)} style={styles.checkBadge}>
             <Text style={styles.checkIcon}>✓</Text>
           </Animated.View>
+          {/* Three dots */}
+          <View style={styles.dotsBelow}>
+            <View style={styles.orangeDotSmall} />
+            <View style={styles.orangeDotSmall} />
+            <View style={styles.orangeDotSmall} />
+          </View>
         </Animated.View>
 
         {/* Title */}
@@ -136,6 +142,18 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 14 * S,
     fontWeight: '700',
+  },
+  dotsBelow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 4 * S,
+    marginTop: 4 * S,
+  },
+  orangeDotSmall: {
+    width: 8 * S,
+    height: 8 * S,
+    borderRadius: 4 * S,
+    backgroundColor: SparkColors.orange,
   },
   title: {
     fontFamily: SparkFonts.outfitBold,

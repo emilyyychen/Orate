@@ -260,7 +260,7 @@ const styles = StyleSheet.create({
     width: 20 * S,
     height: 20 * S,
     borderRadius: 10 * S,
-    backgroundColor: '#4CAF50',
+    backgroundColor: '#6BBF59',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -299,7 +299,7 @@ const styles = StyleSheet.create({
   doneLabel: {
     fontFamily: SparkFonts.robotoMedium,
     fontSize: 14 * S,
-    color: '#4CAF50',
+    color: '#6BBF59',
   },
   progressContainer: {
     marginTop: 24 * S,
