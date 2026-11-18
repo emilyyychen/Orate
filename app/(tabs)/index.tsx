@@ -160,7 +160,7 @@ export default function HomeScreen() {
           <View style={s.quickRow}>
             <Pressable
               style={s.quickCard}
-              onPress={() => router.push('/lessons/practice')}
+              onPress={() => router.push('/record/mic-check')}
             >
               <Ionicons name="mic-outline" size={24 * S} color={SparkColors.brandOrange} />
               <Text style={s.quickTitle}>Free practice</Text>

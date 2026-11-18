@@ -37,6 +37,7 @@ export default function RootLayout() {
         <Stack.Screen name="settings" />
         <Stack.Screen name="feedback" />
         <Stack.Screen name="lessons" />
+        <Stack.Screen name="record" />
       </Stack>
       <StatusBar style="dark" />
     </SafeAreaProvider>
