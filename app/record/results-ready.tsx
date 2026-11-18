@@ -81,24 +81,27 @@ export default function ResultsReadyScreen() {
       <BackgroundDots />
 
       <View style={styles.content}>
-        {/* Character with checkmark */}
+        {/* Character in circle ring with checkmark */}
         <ZoomInView delay={0} style={styles.characterContainer}>
-          <Image
-            source={require('../../assets/images/orate-character.png')}
-            style={styles.character}
-            resizeMode="contain"
-          />
+          <View style={styles.characterCircle}>
+            <Image
+              source={require('../../assets/images/orate-character.png')}
+              style={styles.character}
+              resizeMode="contain"
+            />
+          </View>
           {/* Checkmark badge */}
           <ZoomInView delay={400} style={styles.checkBadge}>
             <Text style={styles.checkIcon}>✓</Text>
           </ZoomInView>
-          {/* Three dots */}
-          <View style={styles.dotsBelow}>
-            <View style={styles.orangeDotSmall} />
-            <View style={styles.orangeDotSmall} />
-            <View style={styles.orangeDotSmall} />
-          </View>
         </ZoomInView>
+
+        {/* Three dots */}
+        <FadeInView delay={200} style={styles.dotsBelow}>
+          <View style={styles.orangeDotSmall} />
+          <View style={styles.orangeDotSmall} />
+          <View style={styles.orangeDotSmall} />
+        </FadeInView>
 
         {/* Title */}
         <FadeInUpView delay={300}>
@@ -148,36 +151,46 @@ const styles = StyleSheet.create({
     paddingHorizontal: 28 * S,
   },
   characterContainer: {
-    marginBottom: 20 * S,
+    marginBottom: 8 * S,
     position: 'relative',
   },
+  characterCircle: {
+    width: 120 * S,
+    height: 120 * S,
+    borderRadius: 60 * S,
+    borderWidth: 3 * S,
+    borderColor: SparkColors.orange,
+    backgroundColor: '#FFF6E8',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   character: {
-    width: 90 * S,
-    height: 90 * S,
+    width: 72 * S,
+    height: 72 * S,
   },
   checkBadge: {
     position: 'absolute',
-    right: -4 * S,
+    right: -2 * S,
     bottom: 2 * S,
-    width: 28 * S,
-    height: 28 * S,
-    borderRadius: 14 * S,
-    backgroundColor: SparkColors.orange,
+    width: 30 * S,
+    height: 30 * S,
+    borderRadius: 15 * S,
+    backgroundColor: '#6BBF59',
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 2,
+    borderWidth: 3,
     borderColor: SparkColors.cream,
   },
   checkIcon: {
     color: '#FFFFFF',
-    fontSize: 14 * S,
+    fontSize: 15 * S,
     fontWeight: '700',
   },
   dotsBelow: {
     flexDirection: 'row',
     justifyContent: 'center',
     gap: 4 * S,
-    marginTop: 4 * S,
+    marginBottom: 20 * S,
   },
   orangeDotSmall: {
     width: 8 * S,

@@ -151,8 +151,25 @@ export default function RecordingScreen() {
     }),
   });
 
-  const handleTap = useCallback(() => {
+  // Stop button animation
+  const stopScale = useRef(new Animated.Value(1)).current;
+
+  const handleStop = useCallback(() => {
     if (isRecording) {
+      // Animate stop button press
+      Animated.sequence([
+        Animated.timing(stopScale, {
+          toValue: 0.85,
+          duration: 100,
+          useNativeDriver: true,
+        }),
+        Animated.timing(stopScale, {
+          toValue: 1,
+          duration: 100,
+          useNativeDriver: true,
+        }),
+      ]).start();
+
       setIsRecording(false);
       setTimeout(() => {
         router.replace({
@@ -164,43 +181,44 @@ export default function RecordingScreen() {
   }, [isRecording, seconds]);
 
   return (
-    <Pressable style={styles.container} onPress={handleTap}>
-      <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
-        {/* Title */}
-        <FadeInView style={styles.headerArea}>
-          <Text style={styles.sessionTitle}>Series B pitch</Text>
-          <Text style={styles.sessionSub}>Recording your presentation</Text>
-        </FadeInView>
+    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+      {/* Title */}
+      <FadeInView style={styles.headerArea}>
+        <Text style={styles.sessionTitle}>Series B pitch</Text>
+      </FadeInView>
 
-        {/* Circle area */}
-        <View style={styles.circleArea}>
-          {/* Ripples */}
-          <Animated.View style={[styles.ripple, styles.rippleLarge, makeRippleStyle(ripple1, volume + 0.5)]} />
-          <Animated.View style={[styles.ripple, styles.rippleMed, makeRippleStyle(ripple2, volume + 0.3)]} />
-          <Animated.View style={[styles.ripple, styles.rippleSmall, makeRippleStyle(ripple3, volume + 0.2)]} />
+      {/* Circle area */}
+      <View style={styles.circleArea}>
+        {/* Ripples */}
+        <Animated.View style={[styles.ripple, styles.rippleLarge, makeRippleStyle(ripple1, volume + 0.5)]} />
+        <Animated.View style={[styles.ripple, styles.rippleMed, makeRippleStyle(ripple2, volume + 0.3)]} />
+        <Animated.View style={[styles.ripple, styles.rippleSmall, makeRippleStyle(ripple3, volume + 0.2)]} />
 
-          {/* Main orange circle */}
-          <Animated.View style={[styles.mainCircle, { transform: [{ scale: glowScale }] }]}>
-            <View style={styles.innerWaves}>
-              {Array.from({ length: 5 }).map((_, i) => (
-                <InnerWaveBar key={i} index={i} volume={volume} />
-              ))}
-            </View>
+        {/* Main orange circle */}
+        <Animated.View style={[styles.mainCircle, { transform: [{ scale: glowScale }] }]}>
+          <View style={styles.innerWaves}>
+            {Array.from({ length: 5 }).map((_, i) => (
+              <InnerWaveBar key={i} index={i} volume={volume} />
+            ))}
+          </View>
+        </Animated.View>
+      </View>
+
+      {/* Timer */}
+      <View style={styles.timerArea}>
+        <Text style={styles.timer}>{formatTime(seconds)}</Text>
+        <Text style={styles.timerSub}>of 05:00</Text>
+      </View>
+
+      {/* Stop button */}
+      <FadeInView delay={500} style={styles.stopArea}>
+        <Pressable onPress={handleStop}>
+          <Animated.View style={[styles.stopButton, { transform: [{ scale: stopScale }] }]}>
+            <View style={styles.stopSquare} />
           </Animated.View>
-        </View>
-
-        {/* Timer */}
-        <View style={styles.timerArea}>
-          <Text style={styles.timer}>{formatTime(seconds)}</Text>
-          <Text style={styles.timerSub}>of 05:00</Text>
-        </View>
-
-        {/* Bottom hint */}
-        <FadeInView delay={1000} style={styles.bottomHint}>
-          <Text style={styles.hintText}>Tap anywhere to pause</Text>
-        </FadeInView>
-      </SafeAreaView>
-    </Pressable>
+        </Pressable>
+      </FadeInView>
+    </SafeAreaView>
   );
 }
 
@@ -208,9 +226,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: SparkColors.cream,
-  },
-  safe: {
-    flex: 1,
   },
   headerArea: {
     alignItems: 'center',
@@ -221,12 +236,6 @@ const styles = StyleSheet.create({
     fontSize: 24 * S,
     lineHeight: 30 * S,
     color: SparkColors.cocoaText,
-    marginBottom: 4 * S,
-  },
-  sessionSub: {
-    fontFamily: SparkFonts.robotoRegular,
-    fontSize: 15 * S,
-    color: SparkColors.orange,
   },
   circleArea: {
     flex: 1,
@@ -270,7 +279,7 @@ const styles = StyleSheet.create({
   },
   timerArea: {
     alignItems: 'center',
-    marginBottom: 60 * S,
+    marginBottom: 32 * S,
   },
   timer: {
     fontFamily: SparkFonts.outfitBold,
@@ -284,13 +293,24 @@ const styles = StyleSheet.create({
     color: SparkColors.warmGray,
     marginTop: -4 * S,
   },
-  bottomHint: {
+  stopArea: {
     alignItems: 'center',
-    paddingBottom: 32 * S,
+    paddingBottom: 40 * S,
   },
-  hintText: {
-    fontFamily: SparkFonts.robotoRegular,
-    fontSize: 15 * S,
-    color: SparkColors.warmGray,
+  stopButton: {
+    width: 56 * S,
+    height: 56 * S,
+    borderRadius: 28 * S,
+    borderWidth: 3 * S,
+    borderColor: SparkColors.cocoaCta,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'transparent',
+  },
+  stopSquare: {
+    width: 20 * S,
+    height: 20 * S,
+    borderRadius: 4 * S,
+    backgroundColor: SparkColors.cocoaCta,
   },
 });

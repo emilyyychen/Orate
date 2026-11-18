@@ -12,7 +12,7 @@ const ANALYSIS_STEPS = [
   'Measuring pacing',
   'Reviewing clarity',
   'Checking pauses',
-  'Comparing your takes',
+  'Preparing your feedback',
 ];
 
 const SUBTITLES = [
@@ -26,17 +26,21 @@ const SUBTITLES = [
 type StepStatus = 'done' | 'active' | 'pending';
 
 function StepIndicator({ status }: { status: StepStatus }) {
+  const scale = useRef(new Animated.Value(0)).current;
   const opacity = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     if (status === 'done') {
-      Animated.timing(opacity, { toValue: 1, duration: 300, useNativeDriver: true }).start();
+      Animated.parallel([
+        Animated.spring(scale, { toValue: 1, damping: 12, stiffness: 150, useNativeDriver: true }),
+        Animated.timing(opacity, { toValue: 1, duration: 300, useNativeDriver: true }),
+      ]).start();
     }
   }, [status]);
 
   if (status === 'done') {
     return (
-      <Animated.View style={[styles.checkCircle, { opacity }]}>
+      <Animated.View style={[styles.checkCircle, { opacity, transform: [{ scale }] }]}>
         <Text style={styles.checkMark}>✓</Text>
       </Animated.View>
     );
@@ -47,35 +51,6 @@ function StepIndicator({ status }: { status: StepStatus }) {
   }
 
   return <View style={styles.pendingDot} />;
-}
-
-function ProgressBar({ progress }: { progress: number }) {
-  const width = useRef(new Animated.Value(0)).current;
-
-  useEffect(() => {
-    Animated.timing(width, {
-      toValue: progress,
-      duration: 600,
-      easing: Easing.out(Easing.ease),
-      useNativeDriver: false,
-    }).start();
-  }, [progress]);
-
-  return (
-    <View style={styles.progressTrack}>
-      <Animated.View
-        style={[
-          styles.progressFill,
-          {
-            width: width.interpolate({
-              inputRange: [0, 100],
-              outputRange: ['0%', '100%'],
-            }),
-          },
-        ]}
-      />
-    </View>
-  );
 }
 
 function BackgroundDots() {
@@ -159,20 +134,21 @@ export default function AnalysisScreen() {
   };
 
   const subtitleIndex = Math.min(currentStep, SUBTITLES.length - 1);
-  const progress = (currentStep / ANALYSIS_STEPS.length) * 100;
 
   return (
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
       <BackgroundDots />
 
       <View style={styles.content}>
-        {/* Character */}
+        {/* Character in circle ring */}
         <FadeInView delay={0} style={styles.characterContainer}>
-          <Image
-            source={require('../../assets/images/orate-character.png')}
-            style={styles.character}
-            resizeMode="contain"
-          />
+          <View style={styles.characterCircle}>
+            <Image
+              source={require('../../assets/images/orate-character.png')}
+              style={styles.character}
+              resizeMode="contain"
+            />
+          </View>
         </FadeInView>
 
         {/* Title */}
@@ -193,30 +169,20 @@ export default function AnalysisScreen() {
             const status = getStatus(i);
             return (
               <View key={i} style={styles.stepRow}>
-                <View style={styles.stepLeft}>
-                  <StepIndicator status={status} />
-                  <Text
-                    style={[
-                      styles.stepText,
-                      status === 'pending' && styles.stepTextPending,
-                      status === 'done' && styles.stepTextDone,
-                    ]}
-                  >
-                    {stepText}
-                  </Text>
-                </View>
-                {status === 'done' && (
-                  <Text style={styles.doneLabel}>Done</Text>
-                )}
+                <StepIndicator status={status} />
+                <Text
+                  style={[
+                    styles.stepText,
+                    status === 'pending' && styles.stepTextPending,
+                    status === 'done' && styles.stepTextDone,
+                  ]}
+                >
+                  {stepText}
+                </Text>
               </View>
             );
           })}
         </FadeInDownView>
-
-        {/* Progress bar */}
-        <View style={styles.progressContainer}>
-          <ProgressBar progress={progress} />
-        </View>
       </View>
     </SafeAreaView>
   );
@@ -244,11 +210,21 @@ const styles = StyleSheet.create({
   },
   characterContainer: {
     alignItems: 'center',
-    marginBottom: 20 * S,
+    marginBottom: 24 * S,
+  },
+  characterCircle: {
+    width: 120 * S,
+    height: 120 * S,
+    borderRadius: 60 * S,
+    borderWidth: 3 * S,
+    borderColor: SparkColors.orange,
+    backgroundColor: '#FFF6E8',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   character: {
-    width: 80 * S,
-    height: 80 * S,
+    width: 72 * S,
+    height: 72 * S,
   },
   title: {
     fontFamily: SparkFonts.outfitBold,
@@ -270,14 +246,8 @@ const styles = StyleSheet.create({
   stepRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
     paddingVertical: 14 * S,
-  },
-  stepLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
     gap: 12 * S,
-    flex: 1,
   },
   checkCircle: {
     width: 20 * S,
@@ -318,24 +288,5 @@ const styles = StyleSheet.create({
   },
   stepTextDone: {
     color: SparkColors.cocoaText,
-  },
-  doneLabel: {
-    fontFamily: SparkFonts.robotoMedium,
-    fontSize: 14 * S,
-    color: '#6BBF59',
-  },
-  progressContainer: {
-    marginTop: 24 * S,
-  },
-  progressTrack: {
-    height: 4 * S,
-    backgroundColor: '#E8DFC6',
-    borderRadius: 2 * S,
-    overflow: 'hidden',
-  },
-  progressFill: {
-    height: '100%',
-    backgroundColor: SparkColors.orange,
-    borderRadius: 2 * S,
   },
 });
