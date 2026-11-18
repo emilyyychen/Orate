@@ -1,17 +1,7 @@
-import React, { useEffect, useState, useCallback } from 'react';
-import { View, Text, StyleSheet, Dimensions, Image } from 'react-native';
+import React, { useEffect, useState, useRef } from 'react';
+import { View, Text, StyleSheet, Dimensions, Image, Animated, Easing } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withTiming,
-  withRepeat,
-  withSequence,
-  FadeIn,
-  FadeInDown,
-  Easing,
-} from 'react-native-reanimated';
 import { SparkColors, SparkFonts } from '@/constants/Spark';
 
 const { width: SW } = Dimensions.get('window');
@@ -33,13 +23,20 @@ const SUBTITLES = [
   'Preparing your feedback',
 ];
 
-// Status: 'done' | 'active' | 'pending'
 type StepStatus = 'done' | 'active' | 'pending';
 
 function StepIndicator({ status }: { status: StepStatus }) {
+  const opacity = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    if (status === 'done') {
+      Animated.timing(opacity, { toValue: 1, duration: 300, useNativeDriver: true }).start();
+    }
+  }, [status]);
+
   if (status === 'done') {
     return (
-      <Animated.View entering={FadeIn.duration(300)} style={styles.checkCircle}>
+      <Animated.View style={[styles.checkCircle, { opacity }]}>
         <Text style={styles.checkMark}>✓</Text>
       </Animated.View>
     );
@@ -53,24 +50,34 @@ function StepIndicator({ status }: { status: StepStatus }) {
 }
 
 function ProgressBar({ progress }: { progress: number }) {
-  const width = useSharedValue(0);
+  const width = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    width.value = withTiming(progress, { duration: 600, easing: Easing.out(Easing.ease) });
+    Animated.timing(width, {
+      toValue: progress,
+      duration: 600,
+      easing: Easing.out(Easing.ease),
+      useNativeDriver: false,
+    }).start();
   }, [progress]);
-
-  const barStyle = useAnimatedStyle(() => ({
-    width: `${width.value}%`,
-  }));
 
   return (
     <View style={styles.progressTrack}>
-      <Animated.View style={[styles.progressFill, barStyle]} />
+      <Animated.View
+        style={[
+          styles.progressFill,
+          {
+            width: width.interpolate({
+              inputRange: [0, 100],
+              outputRange: ['0%', '100%'],
+            }),
+          },
+        ]}
+      />
     </View>
   );
 }
 
-// Decorative background dots
 function BackgroundDots() {
   return (
     <View style={styles.dotsGrid} pointerEvents="none">
@@ -93,6 +100,26 @@ function BackgroundDots() {
   );
 }
 
+function FadeInView({ delay = 0, children, style }: { delay?: number; children: React.ReactNode; style?: any }) {
+  const opacity = useRef(new Animated.Value(0)).current;
+  useEffect(() => {
+    Animated.timing(opacity, { toValue: 1, duration: 600, delay, useNativeDriver: true }).start();
+  }, []);
+  return <Animated.View style={[{ opacity }, style]}>{children}</Animated.View>;
+}
+
+function FadeInDownView({ delay = 0, children, style }: { delay?: number; children: React.ReactNode; style?: any }) {
+  const opacity = useRef(new Animated.Value(0)).current;
+  const translateY = useRef(new Animated.Value(-20)).current;
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(opacity, { toValue: 1, duration: 500, delay, useNativeDriver: true }),
+      Animated.timing(translateY, { toValue: 0, duration: 500, delay, useNativeDriver: true }),
+    ]).start();
+  }, []);
+  return <Animated.View style={[{ opacity, transform: [{ translateY }] }, style]}>{children}</Animated.View>;
+}
+
 export default function AnalysisScreen() {
   const router = useRouter();
   const { time = '05:12', pace = '140' } = useLocalSearchParams<{
@@ -103,7 +130,6 @@ export default function AnalysisScreen() {
   const [currentStep, setCurrentStep] = useState(0);
 
   useEffect(() => {
-    // Progress through steps one by one
     const timers: ReturnType<typeof setTimeout>[] = [];
 
     ANALYSIS_STEPS.forEach((_, i) => {
@@ -114,7 +140,6 @@ export default function AnalysisScreen() {
       );
     });
 
-    // After all steps done, navigate to results
     timers.push(
       setTimeout(() => {
         router.replace({
@@ -142,28 +167,28 @@ export default function AnalysisScreen() {
 
       <View style={styles.content}>
         {/* Character */}
-        <Animated.View entering={FadeIn.duration(600)} style={styles.characterContainer}>
+        <FadeInView delay={0} style={styles.characterContainer}>
           <Image
             source={require('../../assets/images/orate-character.png')}
             style={styles.character}
             resizeMode="contain"
           />
-        </Animated.View>
+        </FadeInView>
 
         {/* Title */}
-        <Animated.View entering={FadeInDown.duration(500).delay(200)}>
+        <FadeInDownView delay={200}>
           <Text style={styles.title}>Recording complete</Text>
-        </Animated.View>
+        </FadeInDownView>
 
         {/* Subtitle */}
-        <Animated.View entering={FadeIn.duration(400).delay(400)}>
-          <Text style={styles.subtitle} key={subtitleIndex}>
+        <FadeInView delay={400}>
+          <Text style={styles.subtitle}>
             {SUBTITLES[subtitleIndex]}
           </Text>
-        </Animated.View>
+        </FadeInView>
 
         {/* Steps */}
-        <Animated.View entering={FadeInDown.duration(500).delay(600)} style={styles.stepsContainer}>
+        <FadeInDownView delay={600} style={styles.stepsContainer}>
           {ANALYSIS_STEPS.map((stepText, i) => {
             const status = getStatus(i);
             return (
@@ -181,14 +206,12 @@ export default function AnalysisScreen() {
                   </Text>
                 </View>
                 {status === 'done' && (
-                  <Animated.Text entering={FadeIn.duration(300)} style={styles.doneLabel}>
-                    Done
-                  </Animated.Text>
+                  <Text style={styles.doneLabel}>Done</Text>
                 )}
               </View>
             );
           })}
-        </Animated.View>
+        </FadeInDownView>
 
         {/* Progress bar */}
         <View style={styles.progressContainer}>

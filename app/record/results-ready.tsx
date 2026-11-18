@@ -1,14 +1,12 @@
-import React from 'react';
-import { View, Text, StyleSheet, Pressable, Dimensions, Image } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, Pressable, Dimensions, Image, Animated } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import Animated, { FadeIn, FadeInUp, ZoomIn } from 'react-native-reanimated';
 import { SparkColors, SparkFonts } from '@/constants/Spark';
 
 const { width: SW } = Dimensions.get('window');
 const S = SW / 390;
 
-// Decorative background dots
 function BackgroundDots() {
   return (
     <View style={styles.dotsGrid} pointerEvents="none">
@@ -29,6 +27,38 @@ function BackgroundDots() {
       )}
     </View>
   );
+}
+
+function FadeInView({ delay = 0, children, style }: { delay?: number; children: React.ReactNode; style?: any }) {
+  const opacity = useRef(new Animated.Value(0)).current;
+  useEffect(() => {
+    Animated.timing(opacity, { toValue: 1, duration: 500, delay, useNativeDriver: true }).start();
+  }, []);
+  return <Animated.View style={[{ opacity }, style]}>{children}</Animated.View>;
+}
+
+function ZoomInView({ delay = 0, children, style }: { delay?: number; children: React.ReactNode; style?: any }) {
+  const scale = useRef(new Animated.Value(0)).current;
+  const opacity = useRef(new Animated.Value(0)).current;
+  useEffect(() => {
+    Animated.parallel([
+      Animated.spring(scale, { toValue: 1, damping: 12, stiffness: 100, delay, useNativeDriver: true }),
+      Animated.timing(opacity, { toValue: 1, duration: 400, delay, useNativeDriver: true }),
+    ]).start();
+  }, []);
+  return <Animated.View style={[{ opacity, transform: [{ scale }] }, style]}>{children}</Animated.View>;
+}
+
+function FadeInUpView({ delay = 0, children, style }: { delay?: number; children: React.ReactNode; style?: any }) {
+  const opacity = useRef(new Animated.Value(0)).current;
+  const translateY = useRef(new Animated.Value(20)).current;
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(opacity, { toValue: 1, duration: 500, delay, useNativeDriver: true }),
+      Animated.timing(translateY, { toValue: 0, duration: 500, delay, useNativeDriver: true }),
+    ]).start();
+  }, []);
+  return <Animated.View style={[{ opacity, transform: [{ translateY }] }, style]}>{children}</Animated.View>;
 }
 
 export default function ResultsReadyScreen() {
@@ -52,46 +82,46 @@ export default function ResultsReadyScreen() {
 
       <View style={styles.content}>
         {/* Character with checkmark */}
-        <Animated.View entering={ZoomIn.duration(600)} style={styles.characterContainer}>
+        <ZoomInView delay={0} style={styles.characterContainer}>
           <Image
             source={require('../../assets/images/orate-character.png')}
             style={styles.character}
             resizeMode="contain"
           />
           {/* Checkmark badge */}
-          <Animated.View entering={ZoomIn.duration(400).delay(400)} style={styles.checkBadge}>
+          <ZoomInView delay={400} style={styles.checkBadge}>
             <Text style={styles.checkIcon}>✓</Text>
-          </Animated.View>
+          </ZoomInView>
           {/* Three dots */}
           <View style={styles.dotsBelow}>
             <View style={styles.orangeDotSmall} />
             <View style={styles.orangeDotSmall} />
             <View style={styles.orangeDotSmall} />
           </View>
-        </Animated.View>
+        </ZoomInView>
 
         {/* Title */}
-        <Animated.View entering={FadeInUp.duration(500).delay(300)}>
+        <FadeInUpView delay={300}>
           <Text style={styles.title}>Your results are ready</Text>
-        </Animated.View>
+        </FadeInUpView>
 
         {/* Subtitle */}
-        <Animated.View entering={FadeIn.duration(500).delay(500)}>
+        <FadeInView delay={500}>
           <Text style={styles.subtitle}>
             See feedback from your first recording.
           </Text>
-        </Animated.View>
+        </FadeInView>
       </View>
 
       {/* Buttons */}
-      <Animated.View entering={FadeIn.duration(500).delay(700)} style={styles.bottomArea}>
+      <FadeInView delay={700} style={styles.bottomArea}>
         <Pressable style={styles.recordAgainButton} onPress={handleRecordAgain}>
           <Text style={styles.recordAgainText}>Record again</Text>
         </Pressable>
         <Pressable style={styles.viewResultsButton} onPress={handleViewResults}>
           <Text style={styles.viewResultsText}>View my results</Text>
         </Pressable>
-      </Animated.View>
+      </FadeInView>
     </SafeAreaView>
   );
 }

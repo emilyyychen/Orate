@@ -1,22 +1,10 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Pressable, Dimensions, Image } from 'react-native';
+import React, { useEffect, useState, useRef } from 'react';
+import { View, Text, StyleSheet, Pressable, Dimensions, Image, Animated } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withTiming,
-  withSpring,
-  withSequence,
-  FadeIn,
-  FadeOut,
-  ZoomIn,
-  Easing,
-  runOnJS,
-} from 'react-native-reanimated';
 import { SparkColors, SparkFonts } from '@/constants/Spark';
 
-const { width: SW, height: SH } = Dimensions.get('window');
+const { width: SW } = Dimensions.get('window');
 const S = SW / 390;
 
 const STEPS = [
@@ -25,7 +13,6 @@ const STEPS = [
   { number: '1', label: 'SPEAK', charPos: 'left' as const },
 ];
 
-// Decorative background dots grid
 function BackgroundDots() {
   return (
     <View style={styles.dotsGrid} pointerEvents="none">
@@ -51,13 +38,43 @@ function BackgroundDots() {
 export default function CountdownScreen() {
   const router = useRouter();
   const [step, setStep] = useState(0);
-  const scale = useSharedValue(0.3);
-  const opacity = useSharedValue(0);
+  const scale = useRef(new Animated.Value(0.3)).current;
+  const opacity = useRef(new Animated.Value(0)).current;
+  const labelOpacity = useRef(new Animated.Value(0)).current;
+  const charScale = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    // Animate in
-    scale.value = withSpring(1, { damping: 12, stiffness: 100 });
-    opacity.value = withTiming(1, { duration: 300 });
+    // Reset and animate for each step
+    scale.setValue(0.3);
+    opacity.setValue(0);
+    labelOpacity.setValue(0);
+    charScale.setValue(0);
+
+    Animated.parallel([
+      Animated.spring(scale, {
+        toValue: 1,
+        damping: 12,
+        stiffness: 100,
+        useNativeDriver: true,
+      }),
+      Animated.timing(opacity, {
+        toValue: 1,
+        duration: 300,
+        useNativeDriver: true,
+      }),
+      Animated.timing(labelOpacity, {
+        toValue: 1,
+        duration: 300,
+        useNativeDriver: true,
+      }),
+      Animated.spring(charScale, {
+        toValue: 1,
+        damping: 12,
+        stiffness: 100,
+        delay: 200,
+        useNativeDriver: true,
+      }),
+    ]).start();
   }, [step]);
 
   useEffect(() => {
@@ -65,15 +82,11 @@ export default function CountdownScreen() {
       setStep((prev) => {
         if (prev >= 2) {
           clearInterval(timer);
-          // Navigate to recording after "1"
           setTimeout(() => {
             router.replace('/record/recording');
           }, 800);
           return prev;
         }
-        // Reset animation values for next step
-        scale.value = 0.3;
-        opacity.value = 0;
         return prev + 1;
       });
     }, 1200);
@@ -82,22 +95,13 @@ export default function CountdownScreen() {
 
   const current = STEPS[step];
 
-  const numberStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.value }],
-    opacity: opacity.value,
-  }));
-
   return (
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
       <BackgroundDots />
 
       {/* Label */}
       <View style={styles.labelContainer}>
-        <Animated.Text
-          key={`label-${step}`}
-          entering={FadeIn.duration(300)}
-          style={styles.label}
-        >
+        <Animated.Text style={[styles.label, { opacity: labelOpacity }]}>
           {current.label}
         </Animated.Text>
       </View>
@@ -105,17 +109,21 @@ export default function CountdownScreen() {
       {/* Number + Character */}
       <View style={styles.centerArea}>
         <View style={styles.numberCharContainer}>
-          <Animated.Text style={[styles.number, numberStyle]}>
+          <Animated.Text
+            style={[
+              styles.number,
+              { transform: [{ scale }], opacity },
+            ]}
+          >
             {current.number}
           </Animated.Text>
           <Animated.View
-            key={`char-${step}`}
-            entering={ZoomIn.duration(400).delay(200)}
             style={[
               styles.characterWrap,
               current.charPos === 'right' && styles.charRight,
               current.charPos === 'top' && styles.charTop,
               current.charPos === 'left' && styles.charLeft,
+              { transform: [{ scale: charScale }] },
             ]}
           >
             <Image

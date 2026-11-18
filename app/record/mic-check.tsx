@@ -1,17 +1,7 @@
 import React, { useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, Pressable, Dimensions, Image } from 'react-native';
+import { View, Text, StyleSheet, Pressable, Dimensions, Image, Animated, Easing } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withRepeat,
-  withTiming,
-  withDelay,
-  withSequence,
-  Easing,
-  FadeIn,
-} from 'react-native-reanimated';
 import { SparkColors, SparkFonts } from '@/constants/Spark';
 
 const { width: SW } = Dimensions.get('window');
@@ -20,121 +10,134 @@ const S = SW / 390;
 const WAVEFORM_BARS = 24;
 
 function WaveformBar({ index, total }: { index: number; total: number }) {
-  const height = useSharedValue(4 * S);
+  const height = useRef(new Animated.Value(4 * S)).current;
 
   useEffect(() => {
-    // Create natural waveform: center bars taller, edges shorter
     const center = total / 2;
     const dist = Math.abs(index - center) / center;
     const maxH = (1 - dist * 0.6) * 28 * S;
     const minH = 4 * S;
 
-    height.value = withDelay(
-      index * 40,
-      withRepeat(
-        withSequence(
-          withTiming(maxH * (0.4 + Math.random() * 0.6), {
+    const animation = Animated.loop(
+      Animated.sequence([
+        Animated.delay(index * 40),
+        Animated.sequence([
+          Animated.timing(height, {
+            toValue: maxH * (0.4 + Math.random() * 0.6),
             duration: 300 + Math.random() * 200,
             easing: Easing.inOut(Easing.sin),
+            useNativeDriver: false,
           }),
-          withTiming(minH + Math.random() * 8 * S, {
+          Animated.timing(height, {
+            toValue: minH + Math.random() * 8 * S,
             duration: 300 + Math.random() * 200,
             easing: Easing.inOut(Easing.sin),
+            useNativeDriver: false,
           }),
-        ),
-        -1,
-        true,
-      ),
+        ]),
+      ]),
     );
+    animation.start();
+    return () => animation.stop();
   }, []);
-
-  const animStyle = useAnimatedStyle(() => ({
-    height: height.value,
-  }));
 
   return (
     <Animated.View
-      style={[
-        {
-          width: 3 * S,
-          borderRadius: 1.5 * S,
-          backgroundColor: SparkColors.orange,
-          marginHorizontal: 1.5 * S,
-        },
-        animStyle,
-      ]}
+      style={{
+        width: 3 * S,
+        height,
+        borderRadius: 1.5 * S,
+        backgroundColor: SparkColors.orange,
+        marginHorizontal: 1.5 * S,
+      }}
     />
   );
 }
 
+function FadeInView({ delay = 0, children, style }: { delay?: number; children: React.ReactNode; style?: any }) {
+  const opacity = useRef(new Animated.Value(0)).current;
+  useEffect(() => {
+    Animated.timing(opacity, {
+      toValue: 1,
+      duration: 600,
+      delay,
+      useNativeDriver: true,
+    }).start();
+  }, []);
+  return <Animated.View style={[{ opacity }, style]}>{children}</Animated.View>;
+}
+
 export default function MicCheckScreen() {
   const router = useRouter();
-
-  const listeningOpacity = useSharedValue(1);
+  const listeningOpacity = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
-    listeningOpacity.value = withRepeat(
-      withSequence(
-        withTiming(0.4, { duration: 800 }),
-        withTiming(1, { duration: 800 }),
-      ),
-      -1,
-      true,
+    const anim = Animated.loop(
+      Animated.sequence([
+        Animated.timing(listeningOpacity, {
+          toValue: 0.4,
+          duration: 800,
+          useNativeDriver: true,
+        }),
+        Animated.timing(listeningOpacity, {
+          toValue: 1,
+          duration: 800,
+          useNativeDriver: true,
+        }),
+      ]),
     );
+    anim.start();
+    return () => anim.stop();
   }, []);
-
-  const listeningStyle = useAnimatedStyle(() => ({
-    opacity: listeningOpacity.value,
-  }));
 
   return (
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
       <View style={styles.content}>
         {/* Character */}
-        <Animated.View entering={FadeIn.duration(600).delay(200)} style={styles.characterContainer}>
+        <FadeInView delay={200} style={styles.characterContainer}>
           <Image
             source={require('../../assets/images/orate-character.png')}
             style={styles.character}
             resizeMode="contain"
           />
-        </Animated.View>
+        </FadeInView>
 
         {/* Title */}
-        <Animated.View entering={FadeIn.duration(600).delay(400)}>
+        <FadeInView delay={400}>
           <Text style={styles.title}>Mic check</Text>
-        </Animated.View>
+        </FadeInView>
 
         {/* Subtitle */}
-        <Animated.View entering={FadeIn.duration(600).delay(500)}>
+        <FadeInView delay={500}>
           <Text style={styles.subtitle}>
             Say a few words to check your{'\n'}microphone.
           </Text>
-        </Animated.View>
+        </FadeInView>
 
         {/* Waveform */}
-        <Animated.View entering={FadeIn.duration(600).delay(600)} style={styles.waveformContainer}>
+        <FadeInView delay={600} style={styles.waveformContainer}>
           <View style={styles.waveform}>
             {Array.from({ length: WAVEFORM_BARS }).map((_, i) => (
               <WaveformBar key={i} index={i} total={WAVEFORM_BARS} />
             ))}
           </View>
-        </Animated.View>
+        </FadeInView>
 
         {/* LISTENING... */}
-        <Animated.Text style={[styles.listeningText, listeningStyle]}>
+        <Animated.Text style={[styles.listeningText, { opacity: listeningOpacity }]}>
           LISTENING...
         </Animated.Text>
       </View>
 
       {/* CTA */}
-      <Animated.View entering={FadeIn.duration(600).delay(800)} style={styles.ctaContainer}>
+      <FadeInView delay={800} style={styles.ctaContainer}>
         <Pressable
           style={styles.ctaButton}
           onPress={() => router.replace('/record/countdown')}
         >
           <Text style={styles.ctaText}>Start recording</Text>
         </Pressable>
-      </Animated.View>
+      </FadeInView>
     </SafeAreaView>
   );
 }

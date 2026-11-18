@@ -1,27 +1,13 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { View, Text, StyleSheet, Pressable, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, Pressable, Dimensions, Animated, Easing } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withRepeat,
-  withTiming,
-  withSpring,
-  withSequence,
-  withDelay,
-  Easing,
-  FadeIn,
-  interpolate,
-  cancelAnimation,
-} from 'react-native-reanimated';
 import { SparkColors, SparkFonts } from '@/constants/Spark';
 
 const { width: SW } = Dimensions.get('window');
 const S = SW / 390;
 const CIRCLE_SIZE = 200 * S;
 
-// Simulated voice volume (0-1) - cycles through natural-feeling values
 function useSimulatedVolume(isRecording: boolean) {
   const [volume, setVolume] = useState(0);
 
@@ -31,7 +17,6 @@ function useSimulatedVolume(isRecording: boolean) {
       return;
     }
     const interval = setInterval(() => {
-      // Simulate natural speech volume
       const base = 0.3 + Math.random() * 0.4;
       const spike = Math.random() > 0.7 ? 0.3 : 0;
       const pause = Math.random() > 0.85 ? -0.3 : 0;
@@ -43,34 +28,44 @@ function useSimulatedVolume(isRecording: boolean) {
   return volume;
 }
 
-// Sound wave bars inside the circle
 function InnerWaveBar({ index, volume }: { index: number; volume: number }) {
-  const height = useSharedValue(4 * S);
+  const height = useRef(new Animated.Value(4 * S)).current;
 
   useEffect(() => {
     const center = 2;
     const dist = Math.abs(index - center) / center;
     const maxH = (1 - dist * 0.5) * 24 * S * volume + 4 * S;
-    height.value = withTiming(maxH, { duration: 120 });
+    Animated.timing(height, {
+      toValue: maxH,
+      duration: 120,
+      useNativeDriver: false,
+    }).start();
   }, [volume]);
-
-  const animStyle = useAnimatedStyle(() => ({
-    height: height.value,
-  }));
 
   return (
     <Animated.View
-      style={[
-        {
-          width: 3 * S,
-          borderRadius: 1.5 * S,
-          backgroundColor: 'rgba(255,255,255,0.9)',
-          marginHorizontal: 2 * S,
-        },
-        animStyle,
-      ]}
+      style={{
+        width: 3 * S,
+        height,
+        borderRadius: 1.5 * S,
+        backgroundColor: 'rgba(255,255,255,0.9)',
+        marginHorizontal: 2 * S,
+      }}
     />
   );
+}
+
+function FadeInView({ delay = 0, children, style }: { delay?: number; children: React.ReactNode; style?: any }) {
+  const opacity = useRef(new Animated.Value(0)).current;
+  useEffect(() => {
+    Animated.timing(opacity, {
+      toValue: 1,
+      duration: 400,
+      delay,
+      useNativeDriver: true,
+    }).start();
+  }, []);
+  return <Animated.View style={[{ opacity }, style]}>{children}</Animated.View>;
 }
 
 export default function RecordingScreen() {
@@ -92,71 +87,73 @@ export default function RecordingScreen() {
     return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
   };
 
-  // Ripple animation
-  const ripple1 = useSharedValue(0);
-  const ripple2 = useSharedValue(0);
-  const ripple3 = useSharedValue(0);
+  // Ripple animations
+  const ripple1 = useRef(new Animated.Value(0)).current;
+  const ripple2 = useRef(new Animated.Value(0)).current;
+  const ripple3 = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     if (isRecording) {
-      ripple1.value = withRepeat(
-        withTiming(1, { duration: 2000, easing: Easing.out(Easing.ease) }),
-        -1,
-        false,
-      );
-      ripple2.value = withDelay(
-        600,
-        withRepeat(
-          withTiming(1, { duration: 2000, easing: Easing.out(Easing.ease) }),
-          -1,
-          false,
-        ),
-      );
-      ripple3.value = withDelay(
-        1200,
-        withRepeat(
-          withTiming(1, { duration: 2000, easing: Easing.out(Easing.ease) }),
-          -1,
-          false,
-        ),
-      );
-    } else {
-      cancelAnimation(ripple1);
-      cancelAnimation(ripple2);
-      cancelAnimation(ripple3);
-      ripple1.value = withTiming(0, { duration: 400 });
-      ripple2.value = withTiming(0, { duration: 400 });
-      ripple3.value = withTiming(0, { duration: 400 });
+      const makeRipple = (val: Animated.Value, delay: number) =>
+        Animated.loop(
+          Animated.sequence([
+            Animated.delay(delay),
+            Animated.timing(val, {
+              toValue: 1,
+              duration: 2000,
+              easing: Easing.out(Easing.ease),
+              useNativeDriver: true,
+            }),
+            Animated.timing(val, {
+              toValue: 0,
+              duration: 0,
+              useNativeDriver: true,
+            }),
+          ]),
+        );
+      const a1 = makeRipple(ripple1, 0);
+      const a2 = makeRipple(ripple2, 600);
+      const a3 = makeRipple(ripple3, 1200);
+      a1.start();
+      a2.start();
+      a3.start();
+      return () => {
+        a1.stop();
+        a2.stop();
+        a3.stop();
+      };
     }
   }, [isRecording]);
 
-  const makeRippleStyle = (rippleVal: Animated.SharedValue<number>, maxScale: number) =>
-    useAnimatedStyle(() => {
-      const baseScale = 1 + rippleVal.value * maxScale * 0.3;
-      return {
-        transform: [{ scale: baseScale }],
-        opacity: interpolate(rippleVal.value, [0, 0.5, 1], [0.4, 0.2, 0]),
-      };
-    });
-
-  const rippleStyle1 = makeRippleStyle(ripple1, volume + 0.5);
-  const rippleStyle2 = makeRippleStyle(ripple2, volume + 0.3);
-  const rippleStyle3 = makeRippleStyle(ripple3, volume + 0.2);
-
-  // Volume-reactive glow
-  const glowScale = useSharedValue(1);
+  // Glow scale
+  const glowScale = useRef(new Animated.Value(1)).current;
   useEffect(() => {
-    glowScale.value = withSpring(1 + volume * 0.15, { damping: 15, stiffness: 150 });
+    Animated.spring(glowScale, {
+      toValue: 1 + volume * 0.15,
+      damping: 15,
+      stiffness: 150,
+      useNativeDriver: true,
+    }).start();
   }, [volume]);
 
-  const glowStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: glowScale.value }],
-  }));
+  const makeRippleStyle = (rippleVal: Animated.Value, maxScale: number) => ({
+    transform: [
+      {
+        scale: rippleVal.interpolate({
+          inputRange: [0, 1],
+          outputRange: [1, 1 + maxScale * 0.3],
+        }),
+      },
+    ],
+    opacity: rippleVal.interpolate({
+      inputRange: [0, 0.5, 1],
+      outputRange: [0.4, 0.2, 0],
+    }),
+  });
 
   const handleTap = useCallback(() => {
     if (isRecording) {
       setIsRecording(false);
-      // Go to paused with current time
       setTimeout(() => {
         router.replace({
           pathname: '/record/paused',
@@ -170,21 +167,20 @@ export default function RecordingScreen() {
     <Pressable style={styles.container} onPress={handleTap}>
       <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
         {/* Title */}
-        <Animated.View entering={FadeIn.duration(400)} style={styles.headerArea}>
+        <FadeInView style={styles.headerArea}>
           <Text style={styles.sessionTitle}>Series B pitch</Text>
           <Text style={styles.sessionSub}>Recording your presentation</Text>
-        </Animated.View>
+        </FadeInView>
 
         {/* Circle area */}
         <View style={styles.circleArea}>
           {/* Ripples */}
-          <Animated.View style={[styles.ripple, styles.rippleLarge, rippleStyle1]} />
-          <Animated.View style={[styles.ripple, styles.rippleMed, rippleStyle2]} />
-          <Animated.View style={[styles.ripple, styles.rippleSmall, rippleStyle3]} />
+          <Animated.View style={[styles.ripple, styles.rippleLarge, makeRippleStyle(ripple1, volume + 0.5)]} />
+          <Animated.View style={[styles.ripple, styles.rippleMed, makeRippleStyle(ripple2, volume + 0.3)]} />
+          <Animated.View style={[styles.ripple, styles.rippleSmall, makeRippleStyle(ripple3, volume + 0.2)]} />
 
           {/* Main orange circle */}
-          <Animated.View style={[styles.mainCircle, glowStyle]}>
-            {/* Wave bars inside */}
+          <Animated.View style={[styles.mainCircle, { transform: [{ scale: glowScale }] }]}>
             <View style={styles.innerWaves}>
               {Array.from({ length: 5 }).map((_, i) => (
                 <InnerWaveBar key={i} index={i} volume={volume} />
@@ -200,9 +196,9 @@ export default function RecordingScreen() {
         </View>
 
         {/* Bottom hint */}
-        <Animated.View entering={FadeIn.duration(600).delay(1000)} style={styles.bottomHint}>
+        <FadeInView delay={1000} style={styles.bottomHint}>
           <Text style={styles.hintText}>Tap anywhere to pause</Text>
-        </Animated.View>
+        </FadeInView>
       </SafeAreaView>
     </Pressable>
   );
@@ -260,7 +256,6 @@ const styles = StyleSheet.create({
     borderRadius: CIRCLE_SIZE / 2,
     justifyContent: 'center',
     alignItems: 'center',
-    // Orange gradient effect using multiple layers
     backgroundColor: '#FF9900',
     shadowColor: '#FF9900',
     shadowOffset: { width: 0, height: 0 },

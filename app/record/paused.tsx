@@ -1,15 +1,13 @@
-import React from 'react';
-import { View, Text, StyleSheet, Pressable, Dimensions, Image } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, Pressable, Dimensions, Animated } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import Animated, { FadeIn, FadeInUp } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { SparkColors, SparkFonts } from '@/constants/Spark';
 
 const { width: SW } = Dimensions.get('window');
 const S = SW / 390;
 
-// Decorative background dots
 function BackgroundDots() {
   return (
     <View style={styles.dotsGrid} pointerEvents="none">
@@ -32,6 +30,31 @@ function BackgroundDots() {
   );
 }
 
+function FadeInView({ delay = 0, children, style }: { delay?: number; children: React.ReactNode; style?: any }) {
+  const opacity = useRef(new Animated.Value(0)).current;
+  useEffect(() => {
+    Animated.timing(opacity, {
+      toValue: 1,
+      duration: 400,
+      delay,
+      useNativeDriver: true,
+    }).start();
+  }, []);
+  return <Animated.View style={[{ opacity }, style]}>{children}</Animated.View>;
+}
+
+function FadeInUpView({ delay = 0, children, style }: { delay?: number; children: React.ReactNode; style?: any }) {
+  const opacity = useRef(new Animated.Value(0)).current;
+  const translateY = useRef(new Animated.Value(20)).current;
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(opacity, { toValue: 1, duration: 500, delay, useNativeDriver: true }),
+      Animated.timing(translateY, { toValue: 0, duration: 500, delay, useNativeDriver: true }),
+    ]).start();
+  }, []);
+  return <Animated.View style={[{ opacity, transform: [{ translateY }] }, style]}>{children}</Animated.View>;
+}
+
 export default function PausedScreen() {
   const router = useRouter();
   const { time = '05:12', seconds = '312' } = useLocalSearchParams<{
@@ -39,13 +62,10 @@ export default function PausedScreen() {
     seconds?: string;
   }>();
 
-  // Simulated pace
   const pace = 140;
 
   const handleResume = () => {
-    router.replace({
-      pathname: '/record/recording',
-    });
+    router.replace({ pathname: '/record/recording' });
   };
 
   const handleFinish = () => {
@@ -65,34 +85,34 @@ export default function PausedScreen() {
 
       <View style={styles.content}>
         {/* Resume recording pill */}
-        <Animated.View entering={FadeIn.duration(400).delay(200)}>
+        <FadeInView delay={200}>
           <Pressable style={styles.resumePill} onPress={handleResume}>
             <Ionicons name="play" size={14 * S} color={SparkColors.cocoaText} />
             <Text style={styles.resumeText}>Resume recording</Text>
           </Pressable>
-        </Animated.View>
+        </FadeInView>
 
         {/* Timer */}
-        <Animated.View entering={FadeInUp.duration(500).delay(100)}>
+        <FadeInUpView delay={100}>
           <Text style={styles.timer}>{time}</Text>
-        </Animated.View>
+        </FadeInUpView>
 
         {/* Pace */}
-        <Animated.View entering={FadeIn.duration(400).delay(300)} style={styles.paceContainer}>
+        <FadeInView delay={300} style={styles.paceContainer}>
           <Text style={styles.paceNumber}>{pace}</Text>
           <Text style={styles.paceLabel}>Pace (wpm)</Text>
-        </Animated.View>
+        </FadeInView>
       </View>
 
       {/* Bottom buttons */}
-      <Animated.View entering={FadeIn.duration(500).delay(400)} style={styles.bottomArea}>
+      <FadeInView delay={400} style={styles.bottomArea}>
         <Pressable style={styles.finishButton} onPress={handleFinish}>
           <Text style={styles.finishText}>Finish take</Text>
         </Pressable>
         <Pressable onPress={handleDiscard} style={styles.discardButton}>
           <Text style={styles.discardText}>Discard</Text>
         </Pressable>
-      </Animated.View>
+      </FadeInView>
     </SafeAreaView>
   );
 }
