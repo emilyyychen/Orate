@@ -1,0 +1,913 @@
+[
+  {
+    "id": "9130:1728",
+    "name": "Orate / Button",
+    "props": {
+      "Label#9130:26": {
+        "type": "TEXT",
+        "defaultValue": "Continue"
+      },
+      "Style": {
+        "type": "VARIANT",
+        "defaultValue": "Primary",
+        "variantOptions": [
+          "Primary",
+          "Secondary",
+          "Outline"
+        ]
+      },
+      "State": {
+        "type": "VARIANT",
+        "defaultValue": "Default",
+        "variantOptions": [
+          "Default",
+          "Pressed",
+          "Disabled",
+          "Loading"
+        ]
+      }
+    },
+    "variants": [
+      {
+        "id": "9130:1704",
+        "name": "Style=Primary, State=Default",
+        "props": {
+          "Style": "Primary",
+          "State": "Default"
+        },
+        "width": 342,
+        "height": 52
+      },
+      {
+        "id": "9130:1706",
+        "name": "Style=Primary, State=Pressed",
+        "props": {
+          "Style": "Primary",
+          "State": "Pressed"
+        },
+        "width": 342,
+        "height": 52
+      },
+      {
+        "id": "9130:1708",
+        "name": "Style=Primary, State=Disabled",
+        "props": {
+          "Style": "Primary",
+          "State": "Disabled"
+        },
+        "width": 342,
+        "height": 52
+      },
+      {
+        "id": "9130:1710",
+        "name": "Style=Primary, State=Loading",
+        "props": {
+          "Style": "Primary",
+          "State": "Loading"
+        },
+        "width": 342,
+        "height": 52
+      },
+      {
+        "id": "9130:1712",
+        "name": "Style=Secondary, State=Default",
+        "props": {
+          "Style": "Secondary",
+          "State": "Default"
+        },
+        "width": 342,
+        "height": 52
+      },
+      {
+        "id": "9130:1714",
+        "name": "Style=Secondary, State=Pressed",
+        "props": {
+          "Style": "Secondary",
+          "State": "Pressed"
+        },
+        "width": 342,
+        "height": 52
+      },
+      {
+        "id": "9130:1716",
+        "name": "Style=Secondary, State=Disabled",
+        "props": {
+          "Style": "Secondary",
+          "State": "Disabled"
+        },
+        "width": 342,
+        "height": 52
+      },
+      {
+        "id": "9130:1718",
+        "name": "Style=Secondary, State=Loading",
+        "props": {
+          "Style": "Secondary",
+          "State": "Loading"
+        },
+        "width": 342,
+        "height": 52
+      },
+      {
+        "id": "9130:1720",
+        "name": "Style=Outline, State=Default",
+        "props": {
+          "Style": "Outline",
+          "State": "Default"
+        },
+        "width": 342,
+        "height": 52
+      },
+      {
+        "id": "9130:1722",
+        "name": "Style=Outline, State=Pressed",
+        "props": {
+          "Style": "Outline",
+          "State": "Pressed"
+        },
+        "width": 342,
+        "height": 52
+      },
+      {
+        "id": "9130:1724",
+        "name": "Style=Outline, State=Disabled",
+        "props": {
+          "Style": "Outline",
+          "State": "Disabled"
+        },
+        "width": 342,
+        "height": 52
+      },
+      {
+        "id": "9130:1726",
+        "name": "Style=Outline, State=Loading",
+        "props": {
+          "Style": "Outline",
+          "State": "Loading"
+        },
+        "width": 342,
+        "height": 52
+      }
+    ]
+  },
+  {
+    "id": "9130:1745",
+    "name": "Orate / Selection row",
+    "props": {
+      "State": {
+        "type": "VARIANT",
+        "defaultValue": "Default",
+        "variantOptions": [
+          "Default",
+          "Selected",
+          "Disabled"
+        ]
+      }
+    },
+    "variants": [
+      {
+        "id": "9130:1729",
+        "name": "State=Default",
+        "props": {
+          "State": "Default"
+        },
+        "width": 342,
+        "height": 64
+      },
+      {
+        "id": "9130:1734",
+        "name": "State=Selected",
+        "props": {
+          "State": "Selected"
+        },
+        "width": 342,
+        "height": 64
+      },
+      {
+        "id": "9130:1740",
+        "name": "State=Disabled",
+        "props": {
+          "State": "Disabled"
+        },
+        "width": 342,
+        "height": 64
+      }
+    ]
+  },
+  {
+    "id": "9130:1761",
+    "name": "Orate / Text field",
+    "props": {
+      "State": {
+        "type": "VARIANT",
+        "defaultValue": "Empty",
+        "variantOptions": [
+          "Empty",
+          "Filled",
+          "Focused",
+          "Error",
+          "Disabled"
+        ]
+      }
+    },
+    "variants": [
+      {
+        "id": "9130:1746",
+        "name": "State=Empty",
+        "props": {
+          "State": "Empty"
+        },
+        "width": 342,
+        "height": 88
+      },
+      {
+        "id": "9130:1749",
+        "name": "State=Filled",
+        "props": {
+          "State": "Filled"
+        },
+        "width": 342,
+        "height": 88
+      },
+      {
+        "id": "9130:1752",
+        "name": "State=Focused",
+        "props": {
+          "State": "Focused"
+        },
+        "width": 342,
+        "height": 88
+      },
+      {
+        "id": "9130:1755",
+        "name": "State=Error",
+        "props": {
+          "State": "Error"
+        },
+        "width": 342,
+        "height": 88
+      },
+      {
+        "id": "9130:1758",
+        "name": "State=Disabled",
+        "props": {
+          "State": "Disabled"
+        },
+        "width": 342,
+        "height": 88
+      }
+    ]
+  },
+  {
+    "id": "9130:1792",
+    "name": "Orate / Result tabs",
+    "props": {
+      "Selected": {
+        "type": "VARIANT",
+        "defaultValue": "Overview",
+        "variantOptions": [
+          "Overview",
+          "Script",
+          "Timeline"
+        ]
+      }
+    },
+    "variants": [
+      {
+        "id": "9130:1762",
+        "name": "Selected=Overview",
+        "props": {
+          "Selected": "Overview"
+        },
+        "width": 390,
+        "height": 53
+      },
+      {
+        "id": "9130:1772",
+        "name": "Selected=Script",
+        "props": {
+          "Selected": "Script"
+        },
+        "width": 390,
+        "height": 53
+      },
+      {
+        "id": "9130:1782",
+        "name": "Selected=Timeline",
+        "props": {
+          "Selected": "Timeline"
+        },
+        "width": 390,
+        "height": 53
+      }
+    ]
+  },
+  {
+    "id": "9130:1901",
+    "name": "Orate / Tab bar",
+    "props": {
+      "Selected": {
+        "type": "VARIANT",
+        "defaultValue": "Home",
+        "variantOptions": [
+          "Home",
+          "History",
+          "Lessons",
+          "Profile"
+        ]
+      }
+    },
+    "variants": [
+      {
+        "id": "9130:1793",
+        "name": "Selected=Home",
+        "props": {
+          "Selected": "Home"
+        },
+        "width": 342,
+        "height": 72
+      },
+      {
+        "id": "9130:1820",
+        "name": "Selected=History",
+        "props": {
+          "Selected": "History"
+        },
+        "width": 342,
+        "height": 72
+      },
+      {
+        "id": "9130:1847",
+        "name": "Selected=Lessons",
+        "props": {
+          "Selected": "Lessons"
+        },
+        "width": 342,
+        "height": 72
+      },
+      {
+        "id": "9130:1874",
+        "name": "Selected=Profile",
+        "props": {
+          "Selected": "Profile"
+        },
+        "width": 342,
+        "height": 72
+      }
+    ]
+  },
+  {
+    "id": "9130:1924",
+    "name": "Orate / Card",
+    "props": {
+      "Type": {
+        "type": "VARIANT",
+        "defaultValue": "Score",
+        "variantOptions": [
+          "Score",
+          "Feedback",
+          "Metric",
+          "Recording"
+        ]
+      }
+    },
+    "variants": [
+      {
+        "id": "9130:1902",
+        "name": "Type=Score",
+        "props": {
+          "Type": "Score"
+        },
+        "width": 342,
+        "height": 156
+      },
+      {
+        "id": "9130:1907",
+        "name": "Type=Feedback",
+        "props": {
+          "Type": "Feedback"
+        },
+        "width": 342,
+        "height": 204
+      },
+      {
+        "id": "9130:1911",
+        "name": "Type=Metric",
+        "props": {
+          "Type": "Metric"
+        },
+        "width": 165,
+        "height": 132
+      },
+      {
+        "id": "9130:1921",
+        "name": "Type=Recording",
+        "props": {
+          "Type": "Recording"
+        },
+        "width": 342,
+        "height": 80
+      }
+    ]
+  },
+  {
+    "id": "9130:1935",
+    "name": "Orate / Analysis status",
+    "props": {
+      "State": {
+        "type": "VARIANT",
+        "defaultValue": "Current",
+        "variantOptions": [
+          "Current",
+          "Pending",
+          "Complete"
+        ]
+      }
+    },
+    "variants": [
+      {
+        "id": "9130:1925",
+        "name": "State=Current",
+        "props": {
+          "State": "Current"
+        },
+        "width": 300,
+        "height": 32
+      },
+      {
+        "id": "9130:1928",
+        "name": "State=Pending",
+        "props": {
+          "State": "Pending"
+        },
+        "width": 300,
+        "height": 32
+      },
+      {
+        "id": "9130:1931",
+        "name": "State=Complete",
+        "props": {
+          "State": "Complete"
+        },
+        "width": 300,
+        "height": 32
+      }
+    ]
+  },
+  {
+    "id": "9130:1954",
+    "name": "Orate / Character loader",
+    "props": {
+      "Frame": {
+        "type": "VARIANT",
+        "defaultValue": "1",
+        "variantOptions": [
+          "1",
+          "2",
+          "3"
+        ]
+      }
+    },
+    "variants": [
+      {
+        "id": "9130:1936",
+        "name": "Frame=1",
+        "props": {
+          "Frame": "1"
+        },
+        "width": 176,
+        "height": 176
+      },
+      {
+        "id": "9130:1942",
+        "name": "Frame=2",
+        "props": {
+          "Frame": "2"
+        },
+        "width": 176,
+        "height": 176
+      },
+      {
+        "id": "9130:1948",
+        "name": "Frame=3",
+        "props": {
+          "Frame": "3"
+        },
+        "width": 176,
+        "height": 176
+      }
+    ]
+  },
+  {
+    "id": "9130:1976",
+    "name": "Orate / Issue marker",
+    "props": {
+      "Type": {
+        "type": "VARIANT",
+        "defaultValue": "Pause",
+        "variantOptions": [
+          "Pause",
+          "Repeat",
+          "Volume",
+          "Background",
+          "Word choice"
+        ]
+      }
+    },
+    "variants": [
+      {
+        "id": "9130:1958",
+        "name": "Type=Pause",
+        "props": {
+          "Type": "Pause"
+        },
+        "width": 44,
+        "height": 44
+      },
+      {
+        "id": "9130:1963",
+        "name": "Type=Repeat",
+        "props": {
+          "Type": "Repeat"
+        },
+        "width": 44,
+        "height": 44
+      },
+      {
+        "id": "9130:1970",
+        "name": "Type=Volume",
+        "props": {
+          "Type": "Volume"
+        },
+        "width": 44,
+        "height": 44
+      },
+      {
+        "id": "9135:1578",
+        "name": "Type=Background",
+        "props": {
+          "Type": "Background"
+        },
+        "width": 44,
+        "height": 44
+      },
+      {
+        "id": "9135:1584",
+        "name": "Type=Word choice",
+        "props": {
+          "Type": "Word choice"
+        },
+        "width": 44,
+        "height": 44
+      }
+    ]
+  },
+  {
+    "id": "9130:1987",
+    "name": "Orate / Bottom sheet",
+    "props": {
+      "Style": {
+        "type": "VARIANT",
+        "defaultValue": "Feedback",
+        "variantOptions": [
+          "Feedback"
+        ]
+      }
+    },
+    "variants": [
+      {
+        "id": "9130:1977",
+        "name": "Style=Feedback",
+        "props": {
+          "Style": "Feedback"
+        },
+        "width": 390,
+        "height": 442
+      }
+    ]
+  },
+  {
+    "id": "9130:1994",
+    "name": "Orate / Moment popover",
+    "props": {
+      "Style": {
+        "type": "VARIANT",
+        "defaultValue": "Moment",
+        "variantOptions": [
+          "Moment"
+        ]
+      }
+    },
+    "variants": [
+      {
+        "id": "9130:1988",
+        "name": "Style=Moment",
+        "props": {
+          "Style": "Moment"
+        },
+        "width": 280,
+        "height": 210
+      }
+    ]
+  },
+  {
+    "id": "9139:1586",
+    "name": "Orate / Header",
+    "props": {
+      "Back#9379:0": {
+        "type": "BOOLEAN",
+        "defaultValue": true
+      },
+      "Title#9379:3": {
+        "type": "TEXT",
+        "defaultValue": "Session results"
+      },
+      "Share": {
+        "type": "VARIANT",
+        "defaultValue": "true",
+        "variantOptions": [
+          "true",
+          "false"
+        ]
+      }
+    },
+    "variants": [
+      {
+        "id": "9139:1578",
+        "name": "Share=true",
+        "props": {
+          "Share": "true"
+        },
+        "width": 390,
+        "height": 48
+      },
+      {
+        "id": "9139:1582",
+        "name": "Share=false",
+        "props": {
+          "Share": "false"
+        },
+        "width": 390,
+        "height": 48
+      }
+    ]
+  },
+  {
+    "id": "9139:1597",
+    "name": "Orate / Choice indicator",
+    "props": {
+      "Type": {
+        "type": "VARIANT",
+        "defaultValue": "Radio",
+        "variantOptions": [
+          "Radio",
+          "Checkbox"
+        ]
+      },
+      "State": {
+        "type": "VARIANT",
+        "defaultValue": "Off",
+        "variantOptions": [
+          "Off",
+          "On"
+        ]
+      }
+    },
+    "variants": [
+      {
+        "id": "9139:1587",
+        "name": "Type=Radio, State=Off",
+        "props": {
+          "Type": "Radio",
+          "State": "Off"
+        },
+        "width": 44,
+        "height": 44
+      },
+      {
+        "id": "9139:1589",
+        "name": "Type=Radio, State=On",
+        "props": {
+          "Type": "Radio",
+          "State": "On"
+        },
+        "width": 44,
+        "height": 44
+      },
+      {
+        "id": "9139:1592",
+        "name": "Type=Checkbox, State=Off",
+        "props": {
+          "Type": "Checkbox",
+          "State": "Off"
+        },
+        "width": 44,
+        "height": 44
+      },
+      {
+        "id": "9139:1594",
+        "name": "Type=Checkbox, State=On",
+        "props": {
+          "Type": "Checkbox",
+          "State": "On"
+        },
+        "width": 44,
+        "height": 44
+      }
+    ]
+  },
+  {
+    "id": "9139:1604",
+    "name": "Orate / Switch",
+    "props": {
+      "State": {
+        "type": "VARIANT",
+        "defaultValue": "Off",
+        "variantOptions": [
+          "Off",
+          "On"
+        ]
+      }
+    },
+    "variants": [
+      {
+        "id": "9139:1598",
+        "name": "State=Off",
+        "props": {
+          "State": "Off"
+        },
+        "width": 52,
+        "height": 44
+      },
+      {
+        "id": "9139:1601",
+        "name": "State=On",
+        "props": {
+          "State": "On"
+        },
+        "width": 52,
+        "height": 44
+      }
+    ]
+  },
+  {
+    "id": "9139:1611",
+    "name": "Orate / Progress",
+    "props": {
+      "State": {
+        "type": "VARIANT",
+        "defaultValue": "Start",
+        "variantOptions": [
+          "Start",
+          "Middle",
+          "Complete"
+        ]
+      }
+    },
+    "variants": [
+      {
+        "id": "9139:1605",
+        "name": "State=Start",
+        "props": {
+          "State": "Start"
+        },
+        "width": 342,
+        "height": 32
+      },
+      {
+        "id": "9139:1607",
+        "name": "State=Middle",
+        "props": {
+          "State": "Middle"
+        },
+        "width": 342,
+        "height": 32
+      },
+      {
+        "id": "9139:1609",
+        "name": "State=Complete",
+        "props": {
+          "State": "Complete"
+        },
+        "width": 342,
+        "height": 32
+      }
+    ]
+  },
+  {
+    "id": "9139:1617",
+    "name": "Orate / Empty state",
+    "props": {
+      "Type": {
+        "type": "VARIANT",
+        "defaultValue": "Empty",
+        "variantOptions": [
+          "Empty"
+        ]
+      }
+    },
+    "variants": [
+      {
+        "id": "9139:1612",
+        "name": "Type=Empty",
+        "props": {
+          "Type": "Empty"
+        },
+        "width": 342,
+        "height": 240
+      }
+    ]
+  },
+  {
+    "id": "9139:1621",
+    "name": "Orate / Message",
+    "props": {
+      "Type": {
+        "type": "VARIANT",
+        "defaultValue": "Error",
+        "variantOptions": [
+          "Error"
+        ]
+      }
+    },
+    "variants": [
+      {
+        "id": "9139:1618",
+        "name": "Type=Error",
+        "props": {
+          "Type": "Error"
+        },
+        "width": 342,
+        "height": 88
+      }
+    ]
+  },
+  {
+    "id": "9139:1632",
+    "name": "Orate / Comparison metric",
+    "props": {
+      "Type": {
+        "type": "VARIANT",
+        "defaultValue": "Comparison",
+        "variantOptions": [
+          "Comparison"
+        ]
+      }
+    },
+    "variants": [
+      {
+        "id": "9139:1622",
+        "name": "Type=Comparison",
+        "props": {
+          "Type": "Comparison"
+        },
+        "width": 165,
+        "height": 148
+      }
+    ]
+  },
+  {
+    "id": "9139:1648",
+    "name": "Orate / Brand motif",
+    "props": {
+      "Motif": {
+        "type": "VARIANT",
+        "defaultValue": "Steps",
+        "variantOptions": [
+          "Steps",
+          "Rhythm",
+          "Speech"
+        ]
+      }
+    },
+    "variants": [
+      {
+        "id": "9139:1633",
+        "name": "Motif=Steps",
+        "props": {
+          "Motif": "Steps"
+        },
+        "width": 120,
+        "height": 120
+      },
+      {
+        "id": "9139:1637",
+        "name": "Motif=Rhythm",
+        "props": {
+          "Motif": "Rhythm"
+        },
+        "width": 120,
+        "height": 120
+      },
+      {
+        "id": "9139:1645",
+        "name": "Motif=Speech",
+        "props": {
+          "Motif": "Speech"
+        },
+        "width": 120,
+        "height": 120
+      }
+    ]
+  }
+]

@@ -1,0 +1,4 @@
+{
+  "extends": "./tsconfig.json",
+  "include": ["tokens.ts", "nativewind-env.d.ts", "app/dev.tsx", "components/design-system/**/*.tsx", "components/Button.tsx", "components/Header.tsx", "components/SelectionRow.tsx", "components/TextField.tsx", "components/ResultTabs.tsx", "components/TabBar.tsx", "components/Card.tsx", "components/AnalysisStatus.tsx", "components/CharacterLoader.tsx", "components/IssueMarker.tsx", "components/BottomSheet.tsx", "components/MomentPopover.tsx", "components/ChoiceIndicator.tsx", "components/Switch.tsx", "components/Progress.tsx", "components/EmptyState.tsx", "components/Message.tsx", "components/ComparisonMetric.tsx", "components/BrandMotif.tsx"]
+}

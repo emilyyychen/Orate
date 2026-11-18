@@ -3,6 +3,12 @@ import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { SparkColors } from '@/constants/Spark';
 
+const FLOWS = [
+  { label: 'Onboarding → Auth Flow', route: '/onboarding/carousel' },
+  { label: 'Home (Main App)', route: '/(tabs)' },
+  { label: 'Sign In', route: '/auth/sign-in' },
+];
+
 export default function WelcomeScreen() {
   const router = useRouter();
 
@@ -20,6 +26,26 @@ export default function WelcomeScreen() {
         <Text style={styles.tagline}>
           Feel ready for your{'\n'}next big moment
         </Text>
+      </View>
+
+      {/* Flow selector */}
+      <View style={styles.flowSection}>
+        <Text style={styles.flowTitle}>Choose a flow</Text>
+        {FLOWS.map((flow) => (
+          <Pressable
+            key={flow.route}
+            style={styles.flowButton}
+            onPress={() => {
+              if (flow.route === '/(tabs)') {
+                router.replace('/(tabs)');
+              } else {
+                router.push(flow.route as any);
+              }
+            }}
+          >
+            <Text style={styles.flowButtonText}>{flow.label}</Text>
+          </Pressable>
+        ))}
       </View>
 
       <View style={styles.bottomSection}>
@@ -70,6 +96,32 @@ const styles = StyleSheet.create({
     lineHeight: 32,
     color: SparkColors.cocoaText,
     textAlign: 'center',
+  },
+  flowSection: {
+    paddingHorizontal: 32,
+    marginBottom: 24,
+  },
+  flowTitle: {
+    fontFamily: 'Roboto-Medium',
+    fontSize: 13,
+    color: SparkColors.warmGray,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+    marginBottom: 10,
+  },
+  flowButton: {
+    backgroundColor: SparkColors.warmCanvas,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: SparkColors.warmBorder,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    marginBottom: 8,
+  },
+  flowButtonText: {
+    fontFamily: 'Roboto-Medium',
+    fontSize: 15,
+    color: SparkColors.cocoaText,
   },
   bottomSection: {
     paddingHorizontal: 32,

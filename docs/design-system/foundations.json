@@ -1,0 +1,17 @@
+{
+  "colors": { "app": "#FFFCF3", "surface": "#FFFFFF", "ink": "#392923", "secondary": "#9B8677", "orange": "#FF9900", "score": "#FF742F", "yellow": "#FFE47B", "softYellow": "#FFF4CC", "peach": "#FFE0A6", "border": "#E8DFC6", "action": "#3A2925", "coral": "#FF4D36" },
+  "spacing": { "screen": 24, "card": 20, "related": 12, "section": 24, "bottom": 28 },
+  "radius": { "card": 24, "inset": 18, "button": 26 },
+  "size": { "screen": 390, "content": 342, "button": 52, "header": 48, "status": 54, "touch": 44 },
+  "typography": {
+    "H1": { "fontFamily": "Outfit-Bold", "fontSize": 28, "lineHeight": 34 },
+    "H2": { "fontFamily": "Outfit-Bold", "fontSize": 22, "lineHeight": 28 },
+    "H3": { "fontFamily": "Outfit-Bold", "fontSize": 20, "lineHeight": 24 },
+    "H4": { "fontFamily": "Outfit-Bold", "fontSize": 18, "lineHeight": 24 },
+    "Body1": { "fontFamily": "Roboto-Regular", "fontSize": 16, "lineHeight": 22 },
+    "Body2": { "fontFamily": "Roboto-Regular", "fontSize": 15, "lineHeight": 21 },
+    "Label": { "fontFamily": "Roboto-Medium", "fontSize": 12, "lineHeight": 16 },
+    "Nav": { "fontFamily": "Outfit-Bold", "fontSize": 17, "lineHeight": 22 },
+    "Button": { "fontFamily": "Roboto-Bold", "fontSize": 16, "lineHeight": 22 }
+  }
+}
